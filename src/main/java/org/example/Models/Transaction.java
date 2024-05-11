@@ -1,5 +1,6 @@
 package org.example.Models;
 
+import com.google.gson.annotations.SerializedName;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -14,22 +15,27 @@ public class Transaction {
     @Id
     @Column(name = "t_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)     // Auto generate new value
+    @SerializedName("Transaction ID")
     private String id;
 
-
     @Column(name = "bankNo_From")
+    @SerializedName("BankNo From")
     private String bankNoFrom;
 
     @Column(name = "bankNo_To")
+    @SerializedName("BankNo To")
     private String bankNoTo;
 
     @Column(name = "amount")
+    @SerializedName("Amount")
     private int amount;
 
     @Column(name = "t_date")
+    @SerializedName("Date")
     private String date;
 
     @Column(name = "letter")
+    @SerializedName("Letter")
     private String letter;
 
     public Transaction() {

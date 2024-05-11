@@ -1,5 +1,6 @@
 package org.example.Models;
 
+import com.google.gson.annotations.SerializedName;
 import jakarta.persistence.*;
 import jdk.jfr.DataAmount;
 import lombok.Data;
@@ -15,31 +16,40 @@ public class Account {
 
     @Id
     @Column(name = "bankNo")
+    @SerializedName("BankNo")
     private String id; // BankNo
 
     @Column(name = "fullName")
+    @SerializedName("FullName")
     private String fullName;
 
     @Column(name = "phoneNo")
+    @SerializedName("PhoneNo")
     private String phoneNo;
 
 //    birthDay - Date
     @Column(name = "birthDay")
+    @SerializedName("BirthDay")
     private String birthDay;
 
     @Column(name = "idCard")
+    @SerializedName("IDCard")
     private String idCard;
 
     @Column(name = "validDate")
+    @SerializedName("ValidDate")
     private String validDate;
 
     @Column(name = "address")
+    @SerializedName("Address")
     private String address;
 
     @Column(name = "password")
+    @SerializedName("Password")
     private String password;
 
     @Column(name = "card_Number")
+    @SerializedName("CardNumber")
     private String cardNumber;
 
     @Transient

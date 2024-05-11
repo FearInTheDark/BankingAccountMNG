@@ -1,5 +1,6 @@
 package org.example.Models;
 
+import com.google.gson.annotations.SerializedName;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -16,30 +17,39 @@ import lombok.Setter;
 public class Card {
     @Id
     @Column(name = "card_number")
+    @SerializedName("CardNumber")
     private String id;
 
     @Column(name = "pin")
+    @SerializedName("Pin")
     private String pin;
 
     @Column(name = "bankNo")
+    @SerializedName("BankNo")
     private String bankNo;
 
     @Column(name = "card_status")
+    @SerializedName("CardStatus")
     private String cardStatus;
 
     @Column(name = "card_type")
+    @SerializedName("CardType")
     private String cardType;
 
     @Column(name = "card_issue_date")
+    @SerializedName("CardIssueDate")
     private String cardIssueDate;
 
     @Column(name = "card_expiry_date")
+    @SerializedName("CardExpiryDate")
     private String cardExpiryDate;
 
     @Column(name = "CVV")
+    @SerializedName("CVV")
     private String cvv;
 
     @Column(name = "balance")
+    @SerializedName("Balance")
     private int balance;
 
     public Card() {
