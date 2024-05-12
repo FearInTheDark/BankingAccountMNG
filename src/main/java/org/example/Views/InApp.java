@@ -4,6 +4,8 @@ import org.example.Data.DB_Manager;
 import org.example.Models.Account;
 import org.example.Models.Card;
 import org.example.Others.DraggableIcon;
+import org.jdesktop.swingx.JXFrame;
+import org.jdesktop.swingx.JXPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +16,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Arrays;
 
-public class InApp extends JFrame {
+public class InApp extends JXFrame {
     private final boolean isMinimized = false;
     String[] quickAccessesText = {"Dashboard", "Accounts", "Transactions", "Cards", "Saving", "Manage Account"};
     String[] qAIcons = {"Dashboard.png", "Accountss.png", "Transactionss.png", "CreCard.png", "Saving.png", "ManageAccount.png"};
@@ -52,11 +54,11 @@ public class InApp extends JFrame {
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
-                int width = getWidth();
-                int height = getHeight();
+                frameWidth = getWidth();
+                frameHeight = getHeight();
             }
         });
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
         setLocationRelativeTo(null);
     }
@@ -257,7 +259,7 @@ public class InApp extends JFrame {
     private void createMenuPanel() {
         this.menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
-        menuPanel.setBackground(new Color(76, 173, 206));
+        menuPanel.setBackground(new Color(51, 117, 138));
         menuPanel.setMinimumSize(new Dimension(400, 0));
 
         logo = new JLabel();
@@ -266,37 +268,39 @@ public class InApp extends JFrame {
         logo.setIcon(logoIconResize);
         logo.setHorizontalAlignment(JLabel.CENTER);
         logo.setVerticalAlignment(JLabel.CENTER);
-        logo.setPreferredSize(new Dimension(300, 300));
+        logo.setPreferredSize(new Dimension(400, 400));
+        logo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+
+        // Welcome Panel
         welcome = new JLabel();
         String name = account.getFullName() != null ? account.getFullName() : "";
         String welcomeText = "<html><div style='text-align: center;'>Welcome <br/>" + name + "</div></html>";
         welcome.setText(welcomeText);
         welcome.setFont(new Font("Segeo UI", Font.BOLD, 30));
         welcome.setForeground(Color.WHITE);
-        welcome.setHorizontalAlignment(JLabel.CENTER);
         welcome.setVerticalAlignment(JLabel.CENTER);
-        welcome.setPreferredSize(new Dimension(300, 100));
-
-        JPanel quickAccesses = new JPanel();
-        quickAccesses.setLayout(new BoxLayout(quickAccesses, BoxLayout.Y_AXIS));
-        quickAccesses.setBackground(new Color(76, 173, 206));
-        quickAccesses.setPreferredSize(new Dimension(300, 700));
+        welcome.setHorizontalAlignment(JLabel.CENTER);
+        welcome.setAlignmentX(Component.CENTER_ALIGNMENT);
+//        welcome.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
 
         box = getBox();
+
+        JXPanel quickAccesses = new JXPanel();
+        quickAccesses.setOpaque(false);
+        quickAccesses.setLayout(new BoxLayout(quickAccesses, BoxLayout.X_AXIS));
         quickAccesses.add(box);
 
         JPanel others = new JPanel();
-        others.setLayout(new FlowLayout());
+        others.setLayout(new FlowLayout(FlowLayout.TRAILING, 20, 0));
         others.setOpaque(false);
-        others.setPreferredSize(new Dimension(400, 100));
+//        others.setPreferredSize(new Dimension(400, 100));
 
         JLabel settings = new JLabel();
         ImageIcon settingsIcon = new ImageIcon("src/main/java/org/example/Views/icons/InApp/settings.png");
         Icon settingsIconResize = new ImageIcon(settingsIcon.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT));
         settings.setIcon(settingsIconResize);
-        settings.setPreferredSize(new Dimension(48, 48));
-
+        settings.setPreferredSize(new Dimension(50, 50));
         settings.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -306,19 +310,23 @@ public class InApp extends JFrame {
         });
 
         JLabel logout = new JLabel();
-        ImageIcon logoutIcon = new ImageIcon("src/main/java/org/example/Views/icons/InApp/log-out.png");
+        ImageIcon logoutIcon = new ImageIcon("src/main/java/org/example/Views/icons/InApp/logout_red.png");
         Icon logoutIconResize = new ImageIcon(logoutIcon.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT));
         logout.setIcon(logoutIconResize);
+        logout.setPreferredSize(new Dimension(50, 50));
         logout.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
                     new LogIn_Frame();
+                    dispose();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }
             }
         });
+
+        others.add(logout);
         others.add(settings);
 
         menuPanel.add(logo);
@@ -339,14 +347,13 @@ public class InApp extends JFrame {
             JLabel label = new JLabel();
             label.setIcon(qAIconResize);
             label.setText(quickAccessesText[i]);
-            label.setFont(new Font("Arial", Font.BOLD, 20));
+            label.setFont(new Font("Arial", Font.BOLD, 25));
 
             label.setForeground(Color.WHITE);
             label.setHorizontalAlignment(JLabel.CENTER);
             label.setVerticalAlignment(JLabel.CENTER);
             label.setIconTextGap(10);
             label.setPreferredSize(new Dimension(300, 100));
-            label.setSize(new Dimension(300, 100));
             final int index = i;
             label.addMouseListener(new MouseAdapter() {
                 final String text = label.getText();
@@ -366,6 +373,7 @@ public class InApp extends JFrame {
                         case 2:
                             JLayeredPane listTransactions = fGUI.getListTransactions(mainWidth, mainHeight);
                             splitPane.setRightComponent(listTransactions);
+                            repaint();
                             splitPane.setDividerLocation(400);
                             break;
                         case 3:
@@ -392,6 +400,7 @@ public class InApp extends JFrame {
                     label.setText(text);
                 }
             });
+            label.setAlignmentX(Component.CENTER_ALIGNMENT);
             box.add(label);
         }
         box.add(Box.createVerticalGlue());

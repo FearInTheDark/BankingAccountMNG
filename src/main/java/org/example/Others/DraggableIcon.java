@@ -28,6 +28,9 @@ public class DraggableIcon extends JXPanel {
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 System.out.println("Clicked");
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    System.out.println("Right clicked");
+                }
             }
         });
 

@@ -4,7 +4,6 @@ package org.example.Views;
 import org.example.Data.DB_Manager;
 import org.example.Models.Account;
 import org.example.Others.PlaceHolder.JPlaceholderPasswordField;
-import org.example.Utils.ObjectToJson;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -43,7 +42,7 @@ public class LogIn_Frame extends JXFrame {
         setLocationRelativeTo(null);
         setVisible(true);
         setSize(WIDTH, HEIGHT);
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
 
     private void initComponents() {
@@ -264,6 +263,7 @@ public class LogIn_Frame extends JXFrame {
             assert admin != null;
             new InApp(admin);
             dispose();
+
             return;
         }
         if (!validateInput()) return;

@@ -453,6 +453,7 @@ public class FunctionsGUI {
             }
         });
 
+
         return listTransactions;
     }
 
