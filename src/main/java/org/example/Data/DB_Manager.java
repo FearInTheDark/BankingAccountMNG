@@ -9,19 +9,15 @@ import org.hibernate.Transaction;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.query.Query;
 
+import java.util.List;
+
 public class DB_Manager {
-    Configuration cfg;
-    SessionFactory sessionFactory;
-    static Session session;
+    static Configuration cfg = new Configuration().configure("hibernate.cfg.xml");
+    static SessionFactory sessionFactory = cfg.buildSessionFactory();
+    static Session session = sessionFactory.openSession();
     static Query<Account> queryAccount;
     static Query<Card> queryCard;
     EntityManager entityManager;
-    public DB_Manager() {
-        cfg = new Configuration();
-        cfg.configure("hibernate.cfg.xml");
-        sessionFactory = cfg.buildSessionFactory();
-        session = sessionFactory.openSession();
-    }
 
     public static Account queryAccount(String userName) {
         String hql;
@@ -38,6 +34,9 @@ public class DB_Manager {
         queryAccount = session.createQuery(hql, Account.class);
         queryAccount.setParameter("username", userName);
 
+        if (queryAccount.list().isEmpty()) {
+            return null;
+        }
         return queryAccount.list().get(0) != null ? queryAccount.list().get(0) : null;
     }
 
@@ -57,7 +56,6 @@ public class DB_Manager {
             }
         }
         queryCard = session.createQuery(hql, Card.class);
-
         queryCard.setParameter("user", userInput);
 
         return queryCard.list().get(0) != null ? queryCard.list().get(0) : null;
@@ -108,11 +106,29 @@ public class DB_Manager {
         queryAccount = session.createQuery(hql, Account.class);
         queryAccount.setParameter("username", userName);
 
+
         return !queryAccount.list().isEmpty();
     }
 
-    public void close() {
-        session.close();
-        sessionFactory.close();
+    public static List<org.example.Models.Transaction> queryTransactions(String userInput) {
+        String hql;
+        Transaction transaction;
+        switch (userInput.length()) {
+            case 10, 12, 16 -> {
+                Account account = queryAccount(userInput);
+                assert account != null;
+                return queryTransactions(account.getId());
+            }
+            case 14 -> hql = "FROM atm_transactions WHERE bankNoFrom = :user OR bankNoTo = :user order by date desc";
+            default -> {
+                System.err.println("Invalid username");
+                return null;
+            }
+        }
+        transaction = session.beginTransaction();
+        Query<org.example.Models.Transaction> listTransactions = session.createQuery(hql, org.example.Models.Transaction.class);
+        listTransactions.setParameter("user", userInput);
+        transaction.commit();
+        return listTransactions.list();
     }
 }

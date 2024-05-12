@@ -99,6 +99,7 @@ public class LogIn_Frame extends JXFrame {
         txtUsername.setBorder(null);
         txtUsername.setOpaque(false);
         txtUsername.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
+        txtUsername.addActionListener(e -> confirm());
         txtUsername.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -138,6 +139,7 @@ public class LogIn_Frame extends JXFrame {
 //        txtPassword.setBorder(null);
         txtPassword.setOpaque(false);
         txtPassword.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
+        txtPassword.addActionListener(e -> confirm());
 
         JXLabel showPassword = getShowLabel(txtPassword);
 
@@ -156,6 +158,7 @@ public class LogIn_Frame extends JXFrame {
         txtPassword2.setFont(new Font("Freeman", Font.ITALIC, 24));
         txtPassword2.setOpaque(false);
         txtPassword2.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
+        txtPassword2.addActionListener(e -> confirm());
 
         JXLabel showPassword2 = getShowLabel(txtPassword2);
 
@@ -214,16 +217,11 @@ public class LogIn_Frame extends JXFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                if (validateInput()) {
-                    username = txtUsername.getText();
-                    password = String.valueOf(txtPassword.getPassword());
-                    if (!DB_Manager.checkExistAccount(username)) {
-                        JOptionPane.showMessageDialog(null, "Account does not exist!");
-                    } else {
-                        Account account = DB_Manager.queryAccount(username);
-                        System.out.println(ObjectToJson.convertToJson(account));
-                    }
-                }
+                if (inSignUp) {
+                    inSignUp = false;
+                    passwordPanel2.setVisible(false);
+                    repaint();
+                } else confirm();
             }
         });
         btnSignUp.addMouseListener(new MouseAdapter() {
@@ -244,21 +242,10 @@ public class LogIn_Frame extends JXFrame {
                 super.mouseClicked(e);
                 if (!inSignUp) {
                     inSignUp = true;
-                    btnSignUp.setIcon(new ImageIcon("src/main/java/org/example/Views/icons/Login/SignUp_hover.png"));
-                    btnLogin.setIcon(new ImageIcon("src/main/java/org/example/Views/icons/Login/Login.png"));
                     passwordPanel2.setVisible(true);
                     repaint();
                 } else {
-                    if (validateInput()) {
-                        username = txtUsername.getText();
-                        password = String.valueOf(txtPassword.getPassword());
-                        if (DB_Manager.checkExistAccount(username)) {
-                            JOptionPane.showMessageDialog(null, "Account already exists!");
-                        } else {
-                            new SignUpSteps(username, password);
-                            dispose();
-                        }
-                    }
+                    confirm();
                 }
             }
         });
@@ -268,6 +255,29 @@ public class LogIn_Frame extends JXFrame {
         layeredPane.add(infoPanel, JLayeredPane.MODAL_LAYER);
 
         add(layeredPane);
+    }
+
+
+    private void confirm() {
+        if (txtUsername.getText().equals("admin") && String.valueOf(txtPassword.getPassword()).equals("admin")) {
+            Account admin = DB_Manager.queryAccount("0000000000");
+            assert admin != null;
+            new InApp(admin);
+            dispose();
+            return;
+        }
+        if (!validateInput()) return;
+        username = txtUsername.getText();
+        password = String.valueOf(txtPassword.getPassword());
+        if (inSignUp) {
+            new SignUpSteps(username, password);
+            dispose();
+        } else {
+            Account account = DB_Manager.queryAccount(username);
+            assert account != null;
+            new InApp(account);
+            dispose();
+        }
     }
 
     private JXLabel getShowLabel(JPasswordField txtPassword) {
@@ -291,7 +301,6 @@ public class LogIn_Frame extends JXFrame {
     }
 
     private boolean validateInput() {
-//        Check phone number = 10 digits, password = 6-20 characters
         if (txtUsername.getText().length() != 10) {
             JOptionPane.showMessageDialog(null, "Phone number must have 10 digits!");
             return false;

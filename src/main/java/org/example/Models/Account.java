@@ -2,7 +2,6 @@ package org.example.Models;
 
 import com.google.gson.annotations.SerializedName;
 import jakarta.persistence.*;
-import jdk.jfr.DataAmount;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +26,6 @@ public class Account {
     @SerializedName("PhoneNo")
     private String phoneNo;
 
-//    birthDay - Date
     @Column(name = "birthDay")
     @SerializedName("BirthDay")
     private String birthDay;

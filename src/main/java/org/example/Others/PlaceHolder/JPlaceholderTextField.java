@@ -1,4 +1,4 @@
-package Interfaces.PlaceHolder;
+package org.example.Others.PlaceHolder;
 
 import javax.swing.*;
 import java.awt.*;

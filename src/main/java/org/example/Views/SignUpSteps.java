@@ -11,8 +11,7 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.io.IOException;
 public class SignUpSteps extends JFrame {
-    private Account account;
-    private String Sname, SidCard, Saddress, Sbirthday, SvalidDate;
+    private final Account account;
     private JLabel guideLabel;
     private JTextField nameField, idCardField, addressField;
     private JFormattedTextField validDateField, birthdayField;
