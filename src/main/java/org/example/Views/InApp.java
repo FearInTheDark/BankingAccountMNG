@@ -3,9 +3,11 @@ package org.example.Views;
 import org.example.Data.DB_Manager;
 import org.example.Models.Account;
 import org.example.Models.Card;
+import org.example.Models.SignedAccounts;
 import org.example.Others.DraggableIcon;
 import org.example.Views.CustomizeUI.MySplitPaneUI;
 import org.jdesktop.swingx.JXFrame;
+import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
 
 import javax.swing.*;
@@ -17,24 +19,22 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.Arrays;
 
+import static org.example.Utils.Features.toggleLog;
+
 public class InApp extends JXFrame {
     String[] quickAccessesText = {"Dashboard", "Accounts", "Transactions", "Cards", "Saving", "Manage Accounts"};
     String[] qAIcons = {"Dashboard.png", "Accounts.png", "Transactions.png", "Cards.png", "Saving.png", "ManageAccount.png"};
     private Account account;
     private Card card;
-    private JLabel logo, welcome, bgPic, frameLabel;
+    private JLabel logo, welcome, bgPic;
     private JSplitPane splitPane;
-    private JLayeredPane mainPanel, bankInfo, mainLayeredPane;
+    private JLayeredPane bgPanel, mainLayeredPane, featuresPanel;
     private JPanel menuPanel;
     private int frameWidth = 1600, frameHeight = 1100;
     private int menuWidth = 400, mainWidth = 1200, mainHeight = frameHeight;
-    private String bankNum;
     private Icon frameIcon, bgIcon;
     private Box box;
     private FunctionsGUI fGUI;
-    private boolean isHiddenBalance = false;
-    private boolean isHiddenCard = false;
-    private boolean isHidden = false;
     private boolean isAdmin = false;
 
     public InApp() {
@@ -42,7 +42,7 @@ public class InApp extends JXFrame {
 
     public InApp(Account account) {
         this.account = account;
-        isAdmin = (account.getFullName().equals("Admin"));
+        isAdmin = (account.getFullName().equalsIgnoreCase("Admin"));
         card = DB_Manager.queryCard(account.getCardNumber());
         fGUI = new FunctionsGUI(account, card);
         init();
@@ -58,6 +58,7 @@ public class InApp extends JXFrame {
                 frameHeight = getHeight();
             }
         });
+        toggleLog(this);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
         setLocationRelativeTo(null);
@@ -88,11 +89,10 @@ public class InApp extends JXFrame {
     }
 
     private void createMainPanel() {
-        this.mainPanel = new JLayeredPane();
+        this.bgPanel = new JLayeredPane();
         this.mainLayeredPane = new JLayeredPane();
-        mainLayeredPane.setOpaque(false);
-        mainPanel.setLayout(new BorderLayout(5, 5));
-        mainPanel.setPreferredSize(new Dimension(mainWidth, frameHeight));
+        bgPanel.setLayout(new BorderLayout(5, 5));
+        bgPanel.setPreferredSize(new Dimension(mainWidth, frameHeight));
 
         JLayeredPane background = new JLayeredPane();
         background.setLayout(null);
@@ -162,22 +162,29 @@ public class InApp extends JXFrame {
 
         String[] functionsText = {"Transfer", "Card Services", "Payment", "Phone Top-up", "Saving", "Account Nickname"};
         Arrays.stream(functionsText).forEach(text -> {
+            JLayeredPane f = new JLayeredPane();
+            f.setPreferredSize(new Dimension(mainWidth / 3 - 30, 160));
 
-            ImageIcon functionIcon = new ImageIcon("src/main/java/org/example/Views/icons/InApp/functions.png");
-            Icon functionIconResize = new ImageIcon(functionIcon.getImage().getScaledInstance(mainWidth / 3 - 30, 150, Image.SCALE_SMOOTH));
+            ImageIcon funcFrame = new ImageIcon("src/main/java/org/example/Views/icons/InApp/functions.png");
+            Icon funcFrameResize = new ImageIcon(funcFrame.getImage().getScaledInstance(mainWidth / 3 - 30, 150, Image.SCALE_SMOOTH));
+            JXLabel frameLabel = new JXLabel();
+            frameLabel.setIcon(funcFrameResize);
+            frameLabel.setPreferredSize(new Dimension(mainWidth / 3 - 30, 160));
+            frameLabel.setHorizontalAlignment(JLabel.CENTER);
+            frameLabel.setVerticalAlignment(JLabel.CENTER);
+            frameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-
+            ImageIcon functionIcon = new ImageIcon("src/main/java/org/example/Views/icons/InApp/FunctionIcons/" + text.toLowerCase() + ".png");
+            Icon funcIconResize = new ImageIcon(functionIcon.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT));
             JLabel label = new JLabel();
-            label.setIcon(functionIconResize);
+            label.setIcon(funcIconResize);
             label.setText(text);
             label.setFont(new Font("Segoe UI", Font.BOLD, 25));
-
-            label.setForeground(Color.BLACK);
+            label.setIconTextGap(10);
+            label.setCursor(new Cursor(Cursor.HAND_CURSOR));
             label.setHorizontalAlignment(JLabel.CENTER);
             label.setVerticalAlignment(JLabel.CENTER);
-            label.setVerticalTextPosition(JLabel.CENTER);
-            label.setHorizontalTextPosition(JLabel.CENTER);
-            label.setIconTextGap(-50);
+            label.setAlignmentX(Component.CENTER_ALIGNMENT);
             label.setPreferredSize(new Dimension(mainWidth / 3 - 30, 160));
 
             label.addMouseListener(new MouseAdapter() {
@@ -211,17 +218,30 @@ public class InApp extends JXFrame {
                     label.setText(removeUnderlineText);
                 }
             });
-            functions.add(label);
+
+            f.addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentResized(ComponentEvent e) {
+                    super.componentResized(e);
+                    label.setBounds(0, 0, f.getWidth(), f.getHeight());
+                    frameLabel.setBounds(0, 0, f.getWidth(), f.getHeight());
+                }
+            });
+
+            f.add(frameLabel, JLayeredPane.DEFAULT_LAYER);
+            f.add(label, JLayeredPane.PALETTE_LAYER);
+
+            functions.add(f);
         });
 
-        mainPanel.add(background, BorderLayout.CENTER);
-        mainPanel.add(functions, BorderLayout.SOUTH);
+        bgPanel.add(background, BorderLayout.CENTER);
+        bgPanel.add(functions, BorderLayout.SOUTH);
 
         DraggableIcon draggableIcon = new DraggableIcon(new ImageIcon("src/main/java/org/example/Views/icons/InApp/robot.png"));
         draggableIcon.setBounds(1000, mainHeight /2 + 50, 100, 100);
 
 
-        mainLayeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
+        mainLayeredPane.add(bgPanel, JLayeredPane.FRAME_CONTENT_LAYER);
         mainLayeredPane.add(draggableIcon, JLayeredPane.DRAG_LAYER);
 
         splitPane.addPropertyChangeListener(evt -> {
@@ -231,10 +251,10 @@ public class InApp extends JXFrame {
             }
         });
 
-        mainPanel.addComponentListener(new ComponentAdapter() {
+        bgPanel.addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent evt) {
-                mainHeight = mainPanel.getHeight();
-                mainWidth = mainPanel.getWidth();
+                mainHeight = bgPanel.getHeight();
+                mainWidth = bgPanel.getWidth();
                 frameWidth = getWidth();
                 frameHeight = getHeight();
                 bgIcon = new ImageIcon(bg.getImage().getScaledInstance(mainWidth, mainWidth / 2, Image.SCALE_DEFAULT));
@@ -249,7 +269,10 @@ public class InApp extends JXFrame {
                 super.componentResized(evt);
                 mainHeight = mainLayeredPane.getHeight();
                 mainWidth = mainLayeredPane.getWidth();
-                mainPanel.setBounds(0, 0, mainWidth, mainHeight);
+                bgPanel.setBounds(0, 0, mainWidth, mainHeight);
+                if (draggableIcon.getX() + 100 > mainWidth) {
+                    draggableIcon.setLocation(mainWidth - 100, draggableIcon.getY());
+                }
             }
         });
 
@@ -320,6 +343,7 @@ public class InApp extends JXFrame {
             public void mouseClicked(MouseEvent e) {
                 try {
                     new LogIn_Frame();
+                    SignedAccounts.addLeftAccountFromSigned(account.getPhoneNo());
                     dispose();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
@@ -441,11 +465,6 @@ public class InApp extends JXFrame {
             label.setSize(new Dimension(50, 50));
 
             label.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-
-
-                }
 
             });
             box.add(label);

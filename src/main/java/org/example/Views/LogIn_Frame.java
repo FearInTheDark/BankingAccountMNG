@@ -19,6 +19,18 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 
+import static org.example.Utils.Features.toggleLog;
+
+/**
+ * <p> This class is used to create the LogIn_Frame.
+ * <p> It extends JXFrame in order to create the frame.
+ * <p> It contains the components of the frame such as the username, password, login button, and sign up button.
+ * <p> It also contains the methods to initialize the components, confirm the input, and validate the input.
+ *
+ * @see org.example.Models.Account
+ * @see org.example.Models.SignedAccounts
+ */
+
 public class LogIn_Frame extends JXFrame {
     private final int WIDTH = 1350, HEIGHT = 768;
     private JTextField txtUsername;
@@ -29,6 +41,8 @@ public class LogIn_Frame extends JXFrame {
     private boolean inSignUp = false;
 
     public LogIn_Frame() throws IOException {
+        if (!DB_Manager.isHibernateInitialized) new Thread(DB_Manager::initHibernate).start();
+
         initComponents();
 
         ImageIcon frameIcon = new ImageIcon("src/main/java/org/example/Views/icons/Login/frame.png");
@@ -41,8 +55,16 @@ public class LogIn_Frame extends JXFrame {
         setLocationRelativeTo(null);
         setVisible(true);
         setSize(WIDTH, HEIGHT);
+        toggleLog(this);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     }
+
+    /**
+     * <p> This method initializes the components of the frame.
+     * <p> It creates the main icon, the input panel, the info panel, the title panel, the username panel, the password panel, the password panel 2, the button panel, the show password label, and the show password label 2.
+     *
+     * @see org.example.Views.LogIn_Frame#initComponents()
+     */
 
     private void initComponents() {
         JLayeredPane layeredPane = new JLayeredPane();
@@ -270,37 +292,27 @@ public class LogIn_Frame extends JXFrame {
         if (inSignUp) {
             new SignUpSteps(username, password);
             dispose();
-        } else {
-            Account account;
-            if (SignedAccounts.signedAccounts.get(username) == null) {
-                account = DB_Manager.queryAccount(username);
-                if (account == null || !account.getPassword().equals(password)) {
-                    ErrorInfo errorInfo = new ErrorInfo("Error Information", "Invalid username or password", null, "Error", null, null, null);
-                    JXErrorPane.showDialog(null, errorInfo);
-                    return;
-                }
-                SignedAccounts.signedAccounts.put(username, account);
-            } else {
-                account = SignedAccounts.signedAccounts.get(username);
-                if (!account.getPassword().equals(password)) {
-                    ErrorInfo errorInfo = new ErrorInfo("Error Information", "Invalid username or password", null, "Error", null, null, null);
-                    JXErrorPane.showDialog(null, errorInfo);
-                    return;
-                }
-            }
-            new InApp(account);
-            System.out.println(SignedAccounts.signedAccounts);
-            dispose();
-
-//            Account account = RequestAccount.requestAccount(username, password);
-//            if (account == null) {
-//                ErrorInfo errorInfo = new ErrorInfo("Error Information", "Invalid username or password", null, "Error", null, null, null);
-//                JXErrorPane.showDialog(null, errorInfo);
-//                return;
-//            }
-//            new InApp(account);
+            return;
         }
+        long startTime = System.currentTimeMillis(); // Start time
+        Account account;
+        if (SignedAccounts.leftAccounts.containsKey(username)) {
+            account = SignedAccounts.leftAccounts.get(username);
+            validatePassword(account, password);
+            SignedAccounts.addSignedAccountFromLeft(username);
+        } else {
+            account = DB_Manager.queryAccount(username);
+            validatePassword(account, password);
+            SignedAccounts.addSignedAccount(account);
+        }
+        assert account != null;
+        new InApp(account);
+        dispose();
+        long endTime = System.currentTimeMillis(); // End time
+
+        System.out.println("Time taken: " + (endTime - startTime) + "ms");
     }
+
 
     private JXLabel getShowLabel(JPasswordField txtPassword) {
         JXLabel showLabel = new JXLabel();
@@ -339,4 +351,10 @@ public class LogIn_Frame extends JXFrame {
         }
         return true;
     }
+
+    private void validatePassword(Account account, String password) {
+        if (account == null || !account.getPassword().equals(password))
+            JXErrorPane.showDialog(null, new ErrorInfo("Error", "Account not found!", null, "OK", null, null, null));
+    }
+
 }
