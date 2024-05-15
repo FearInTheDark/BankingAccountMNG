@@ -11,7 +11,7 @@ public class MySplitPaneDivider extends BasicSplitPaneDivider {
 
     @Override
     public void paint(Graphics g) {
-        g.setColor(new Color(0xadadad)); // Change the color as per your requirement
+        g.setColor(new Color(0x707070)); // Change the color as per your requirement
         g.fillRect(0, 0, getSize().width, getSize().height);
     }
 }

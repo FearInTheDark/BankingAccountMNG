@@ -4,6 +4,7 @@ import org.example.Data.DB_Manager;
 import org.example.Models.Account;
 import org.example.Models.Card;
 import org.example.Others.DraggableIcon;
+import org.example.Views.CustomizeUI.MySplitPaneUI;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXPanel;
 
@@ -17,9 +18,8 @@ import java.io.IOException;
 import java.util.Arrays;
 
 public class InApp extends JXFrame {
-    private final boolean isMinimized = false;
-    String[] quickAccessesText = {"Dashboard", "Accounts", "Transactions", "Cards", "Saving", "Manage Account"};
-    String[] qAIcons = {"Dashboard.png", "Accountss.png", "Transactionss.png", "CreCard.png", "Saving.png", "ManageAccount.png"};
+    String[] quickAccessesText = {"Dashboard", "Accounts", "Transactions", "Cards", "Saving", "Manage Accounts"};
+    String[] qAIcons = {"Dashboard.png", "Accounts.png", "Transactions.png", "Cards.png", "Saving.png", "ManageAccount.png"};
     private Account account;
     private Card card;
     private JLabel logo, welcome, bgPic, frameLabel;
@@ -72,7 +72,8 @@ public class InApp extends JXFrame {
 
         splitPane.setLeftComponent(menuPanel);
         splitPane.setRightComponent(mainLayeredPane);
-        splitPane.setDividerSize(0);
+        splitPane.setDividerSize(5);
+        splitPane.setUI(new MySplitPaneUI());
         splitPane.setDividerLocation(400);
 
         addComponentListener(new ComponentAdapter() {
@@ -89,12 +90,9 @@ public class InApp extends JXFrame {
     private void createMainPanel() {
         this.mainPanel = new JLayeredPane();
         this.mainLayeredPane = new JLayeredPane();
-        mainLayeredPane.setBackground(Color.cyan);
         mainLayeredPane.setOpaque(false);
         mainPanel.setLayout(new BorderLayout(5, 5));
-//        mainPanel.setPreferredSize(new Dimension(mainWidth, frameHeight));
-        mainPanel.setBounds(0, 0, mainWidth, mainHeight);
-//        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setPreferredSize(new Dimension(mainWidth, frameHeight));
 
         JLayeredPane background = new JLayeredPane();
         background.setLayout(null);
@@ -108,6 +106,7 @@ public class InApp extends JXFrame {
 
         JLayeredPane cardPane = fGUI.getCard();
         cardPane.setBounds((mainWidth - 743) / 2, (600) / 2 + 150, 743, 233);
+
         JLabel showBankAcc = new JLabel();
         showBankAcc.setText("Show all accounts");
         showBankAcc.setFont(new Font("Arial", Font.ITALIC, 15));
@@ -171,7 +170,7 @@ public class InApp extends JXFrame {
             JLabel label = new JLabel();
             label.setIcon(functionIconResize);
             label.setText(text);
-            label.setFont(new Font("Segoe UI", Font.BOLD, 20));
+            label.setFont(new Font("Segoe UI", Font.BOLD, 25));
 
             label.setForeground(Color.BLACK);
             label.setHorizontalAlignment(JLabel.CENTER);
@@ -219,7 +218,7 @@ public class InApp extends JXFrame {
         mainPanel.add(functions, BorderLayout.SOUTH);
 
         DraggableIcon draggableIcon = new DraggableIcon(new ImageIcon("src/main/java/org/example/Views/icons/InApp/robot.png"));
-        draggableIcon.setBounds(9, 9, 100, 100);
+        draggableIcon.setBounds(1000, mainHeight /2 + 50, 100, 100);
 
 
         mainLayeredPane.add(mainPanel, JLayeredPane.DEFAULT_LAYER);
@@ -297,6 +296,7 @@ public class InApp extends JXFrame {
 //        others.setPreferredSize(new Dimension(400, 100));
 
         JLabel settings = new JLabel();
+        settings.setCursor(new Cursor(Cursor.HAND_CURSOR));
         ImageIcon settingsIcon = new ImageIcon("src/main/java/org/example/Views/icons/InApp/settings.png");
         Icon settingsIconResize = new ImageIcon(settingsIcon.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT));
         settings.setIcon(settingsIconResize);
@@ -305,11 +305,12 @@ public class InApp extends JXFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
 //                splitPane.setRightComponent(fGUI.getMenuGUI(bankNo));
-                splitPane.setDividerLocation(300);
+                splitPane.setDividerLocation(400);
             }
         });
 
         JLabel logout = new JLabel();
+        logout.setCursor(new Cursor(Cursor.HAND_CURSOR));
         ImageIcon logoutIcon = new ImageIcon("src/main/java/org/example/Views/icons/InApp/logout_red.png");
         Icon logoutIconResize = new ImageIcon(logoutIcon.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT));
         logout.setIcon(logoutIconResize);
@@ -324,7 +325,22 @@ public class InApp extends JXFrame {
                     throw new RuntimeException(ex);
                 }
             }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                super.mouseEntered(e);
+                ImageIcon logoutIcon = new ImageIcon("src/main/java/org/example/Views/icons/InApp/logout_red_hover.png");
+                Icon logoutIconResize = new ImageIcon(logoutIcon.getImage().getScaledInstance(50, 50, Image.SCALE_DEFAULT));
+                logout.setIcon(logoutIconResize);
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                super.mouseExited(e);
+                logout.setIcon(logoutIconResize);
+            }
         });
+        logout.setToolTipText("Logout");
 
         others.add(logout);
         others.add(settings);
@@ -341,10 +357,11 @@ public class InApp extends JXFrame {
         box.add(Box.createVerticalGlue());
 
         for (int i = 0; i < (isAdmin ? 6 : 5); i++) {
-            ImageIcon qAIcon = new ImageIcon("src/main/java/org/example/Views/icons/InApp/" + qAIcons[i]);
+            ImageIcon qAIcon = new ImageIcon("src/main/java/org/example/Views/icons/InApp/" + quickAccessesText[i] + ".png");
             Icon qAIconResize = new ImageIcon(qAIcon.getImage().getScaledInstance(64, 64, Image.SCALE_DEFAULT));
 
             JLabel label = new JLabel();
+            label.setCursor(new Cursor(Cursor.HAND_CURSOR));
             label.setIcon(qAIconResize);
             label.setText(quickAccessesText[i]);
             label.setFont(new Font("Arial", Font.BOLD, 25));
@@ -362,7 +379,7 @@ public class InApp extends JXFrame {
                 public void mouseClicked(MouseEvent e) {
                     switch (index) {
                         case 0:
-                            splitPane.setRightComponent(mainPanel);
+                            splitPane.setRightComponent(mainLayeredPane);
                             splitPane.setDividerLocation(400);
                             break;
                         case 1:
@@ -373,6 +390,7 @@ public class InApp extends JXFrame {
                         case 2:
                             JLayeredPane listTransactions = fGUI.getListTransactions(mainWidth, mainHeight);
                             splitPane.setRightComponent(listTransactions);
+                            revalidate();
                             repaint();
                             splitPane.setDividerLocation(400);
                             break;
@@ -421,8 +439,6 @@ public class InApp extends JXFrame {
 
             label.setPreferredSize(new Dimension(50, 50));
             label.setSize(new Dimension(50, 50));
-//            final String text = quickAccessesText[i];
-//            final int index = i;
 
             label.addMouseListener(new MouseAdapter() {
                 @Override
@@ -436,48 +452,6 @@ public class InApp extends JXFrame {
         }
         box.add(Box.createVerticalGlue());
         return box;
-    }
-
-    private String maskAccountNumber(String accountNumber) {
-        if (accountNumber.length() != 16) {
-            System.out.println("Invalid account number length");
-            throw new IllegalArgumentException("Invalid account number length");
-        }
-
-        StringBuilder maskedNumber = new StringBuilder();
-
-        for (int i = 0; i < accountNumber.length(); i++) {
-            if (i >= 12 || accountNumber.charAt(i) == ' ') {
-                maskedNumber.append(accountNumber.charAt(i));
-            } else {
-                maskedNumber.append('*');
-            }
-
-            if ((i + 1) % 4 == 0 && (i + 1) < accountNumber.length()) {
-                maskedNumber.append(' ');
-            }
-        }
-
-        return maskedNumber.toString();
-    }
-
-    private String formatAccountNumber(String accountNumber) {
-        if (accountNumber.length() != 16) {
-            System.out.println("Invalid account number length");
-            throw new IllegalArgumentException("Invalid account number length");
-        }
-
-        StringBuilder formattedNumber = new StringBuilder();
-
-        for (int i = 0; i < accountNumber.length(); i++) {
-            if (i > 0 && i % 4 == 0) {
-                formattedNumber.append(' ');
-            }
-
-            formattedNumber.append(accountNumber.charAt(i));
-        }
-
-        return formattedNumber.toString();
     }
 
     private void minimizeQA() {
@@ -494,29 +468,5 @@ public class InApp extends JXFrame {
         logo.setVisible(true);
         welcome.setVisible(true);
         repaint();
-    }
-
-    public JLabel getBgPic() {
-        return bgPic;
-    }
-
-    public JLayeredPane getBankInfo() {
-        return bankInfo;
-    }
-
-    public JLabel getFrameLabel() {
-        return frameLabel;
-    }
-
-    public JLabel getLogo() {
-        return logo;
-    }
-
-    public JLabel getWelcome() {
-        return welcome;
-    }
-
-    public JPanel getMenuPanel() {
-        return menuPanel;
     }
 }

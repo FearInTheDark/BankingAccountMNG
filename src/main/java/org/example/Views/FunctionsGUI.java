@@ -18,6 +18,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
 
+import static org.example.Utils.Formatter.formatAccountNumber;
+import static org.example.Utils.Formatter.maskAccountNumber;
+
 public class FunctionsGUI {
     private static JPopupMenu popupMenu;
     private final Account account;
@@ -672,42 +675,4 @@ public class FunctionsGUI {
         return card;
     }
 
-    private String formatAccountNumber(String accountNumber) {
-        if (accountNumber.length() != 16) {
-            System.out.println("Invalid account number length");
-            throw new IllegalArgumentException("Invalid account number length");
-        }
-
-        StringBuilder formattedNumber = new StringBuilder();
-
-        for (int i = 0; i < accountNumber.length(); i++) {
-            if (i > 0 && i % 4 == 0) {
-                formattedNumber.append(' ');
-            }
-
-            formattedNumber.append(accountNumber.charAt(i));
-        }
-
-        return formattedNumber.toString();
-    }
-
-    private String maskAccountNumber(String accountNumber) {
-        if (accountNumber.length() != 16) {
-            System.out.println("Invalid account number length");
-            throw new IllegalArgumentException("Invalid account number length");
-        }
-        StringBuilder maskedNumber = new StringBuilder();
-        for (int i = 0; i < accountNumber.length(); i++) {
-            if (i >= 12 || accountNumber.charAt(i) == ' ') {
-                maskedNumber.append(accountNumber.charAt(i));
-            } else {
-                maskedNumber.append('*');
-            }
-            if ((i + 1) % 4 == 0 && (i + 1) < accountNumber.length()) {
-                maskedNumber.append(' ');
-            }
-        }
-
-        return maskedNumber.toString();
-    }
 }

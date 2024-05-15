@@ -1,8 +1,5 @@
 package org.example;
 
-import org.example.Data.DB_Manager;
-import org.example.Models.Account;
-import org.example.Views.InApp;
 import org.example.Views.LogIn_Frame;
 
 import java.io.IOException;

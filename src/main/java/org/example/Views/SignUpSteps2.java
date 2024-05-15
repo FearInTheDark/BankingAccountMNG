@@ -25,7 +25,6 @@ public class SignUpSteps2 extends JFrame {
     public SignUpSteps2(Account account)  {
         this.account = account;
         this.card = new Card();
-        setInfo();
         genCard();
         init();
 
@@ -228,15 +227,12 @@ public class SignUpSteps2 extends JFrame {
         layeredPane.add(cardInfoPanel, JLayeredPane.MODAL_LAYER);
     }
 
-    private void setInfo() {
+    private void setCardInfo(String bankNo, String cardNumber, String CVV) {
         LocalDate currentDate = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         card.setCardIssueDate(currentDate.format(formatter));
         card.setCardExpiryDate(currentDate.plusYears(5).format(formatter));
         card.setBalance(0);
-    }
-
-    private void setCardInfo(String bankNo, String cardNumber, String CVV) {
         card.setBankNo(bankNo);
         card.setId(cardNumber);
         card.setCvv(CVV);

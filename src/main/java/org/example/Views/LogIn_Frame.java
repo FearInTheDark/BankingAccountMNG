@@ -3,10 +3,13 @@ package org.example.Views;
 
 import org.example.Data.DB_Manager;
 import org.example.Models.Account;
+import org.example.Models.SignedAccounts;
 import org.example.Others.PlaceHolder.JPlaceholderPasswordField;
+import org.jdesktop.swingx.JXErrorPane;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
+import org.jdesktop.swingx.error.ErrorInfo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,19 +20,15 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 
 public class LogIn_Frame extends JXFrame {
-    private final DB_Manager dbManager;
+    private final int WIDTH = 1350, HEIGHT = 768;
     private JTextField txtUsername;
     private JPasswordField txtPassword, txtPassword2;
-    private Box box;
-    private JLabel btnLogin, btnSignUp, usernameIcon, passwordIcon, passwordIcon2;
+    private JLabel btnLogin;
+    private JLabel btnSignUp;
     private JXPanel passwordPanel2;
     private boolean inSignUp = false;
-    private JLayeredPane layeredPane;
-    private String username, password;
-    private final int WIDTH = 1350, HEIGHT = 768;
 
     public LogIn_Frame() throws IOException {
-        dbManager = new DB_Manager();
         initComponents();
 
         ImageIcon frameIcon = new ImageIcon("src/main/java/org/example/Views/icons/Login/frame.png");
@@ -46,7 +45,7 @@ public class LogIn_Frame extends JXFrame {
     }
 
     private void initComponents() {
-        layeredPane = new JLayeredPane();
+        JLayeredPane layeredPane = new JLayeredPane();
         layeredPane.setBounds(0, 0, WIDTH, HEIGHT);
 //        Title icon
         JXLabel mainIcon = new JXLabel();
@@ -86,7 +85,7 @@ public class LogIn_Frame extends JXFrame {
         usernamePanel.setLayout(new BoxLayout(usernamePanel, BoxLayout.X_AXIS));
         usernamePanel.setOpaque(false);
 
-        usernameIcon = new JLabel();
+        JLabel usernameIcon = new JLabel();
         usernameIcon.setIcon(new ImageIcon("src/main/java/org/example/Views/icons/Login/userResized.png"));
         usernameIcon.setPreferredSize(new Dimension(50, 50));
 
@@ -127,7 +126,7 @@ public class LogIn_Frame extends JXFrame {
         passwordPanel.setLayout(new BoxLayout(passwordPanel, BoxLayout.X_AXIS));
         passwordPanel.setOpaque(false);
 
-        passwordIcon = new JLabel();
+        JLabel passwordIcon = new JLabel();
         passwordIcon.setIcon(new ImageIcon("src/main/java/org/example/Views/icons/Login/lock_Resized.png"));
         passwordIcon.setPreferredSize(new Dimension(50, 50));
 
@@ -147,7 +146,7 @@ public class LogIn_Frame extends JXFrame {
         passwordPanel2.setOpaque(false);
         passwordPanel2.setVisible(false);
 
-        passwordIcon2 = new JLabel();
+        JLabel passwordIcon2 = new JLabel();
         passwordIcon2.setIcon(new ImageIcon("src/main/java/org/example/Views/icons/Login/lock_Resized.png"));
         passwordIcon2.setPreferredSize(new Dimension(50, 50));
 
@@ -187,7 +186,7 @@ public class LogIn_Frame extends JXFrame {
         btnPanel.add(btnLogin);
         btnPanel.add(btnSignUp);
 
-        box = Box.createVerticalBox();
+        Box box = Box.createVerticalBox();
         box.add(Box.createVerticalStrut(50));
         box.add(titlePanel);
         box.add(Box.createVerticalStrut(50));
@@ -243,9 +242,8 @@ public class LogIn_Frame extends JXFrame {
                     inSignUp = true;
                     passwordPanel2.setVisible(true);
                     repaint();
-                } else {
-                    confirm();
-                }
+                } else confirm();
+
             }
         });
 
@@ -267,16 +265,40 @@ public class LogIn_Frame extends JXFrame {
             return;
         }
         if (!validateInput()) return;
-        username = txtUsername.getText();
-        password = String.valueOf(txtPassword.getPassword());
+        String username = txtUsername.getText();
+        String password = String.valueOf(txtPassword.getPassword());
         if (inSignUp) {
             new SignUpSteps(username, password);
             dispose();
         } else {
-            Account account = DB_Manager.queryAccount(username);
-            assert account != null;
+            Account account;
+            if (SignedAccounts.signedAccounts.get(username) == null) {
+                account = DB_Manager.queryAccount(username);
+                if (account == null || !account.getPassword().equals(password)) {
+                    ErrorInfo errorInfo = new ErrorInfo("Error Information", "Invalid username or password", null, "Error", null, null, null);
+                    JXErrorPane.showDialog(null, errorInfo);
+                    return;
+                }
+                SignedAccounts.signedAccounts.put(username, account);
+            } else {
+                account = SignedAccounts.signedAccounts.get(username);
+                if (!account.getPassword().equals(password)) {
+                    ErrorInfo errorInfo = new ErrorInfo("Error Information", "Invalid username or password", null, "Error", null, null, null);
+                    JXErrorPane.showDialog(null, errorInfo);
+                    return;
+                }
+            }
             new InApp(account);
+            System.out.println(SignedAccounts.signedAccounts);
             dispose();
+
+//            Account account = RequestAccount.requestAccount(username, password);
+//            if (account == null) {
+//                ErrorInfo errorInfo = new ErrorInfo("Error Information", "Invalid username or password", null, "Error", null, null, null);
+//                JXErrorPane.showDialog(null, errorInfo);
+//                return;
+//            }
+//            new InApp(account);
         }
     }
 
