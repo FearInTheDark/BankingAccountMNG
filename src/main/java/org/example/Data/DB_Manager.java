@@ -12,12 +12,24 @@ import org.hibernate.query.Query;
 import java.util.List;
 
 public class DB_Manager {
-    static Configuration cfg = new Configuration().configure("hibernate.cfg.xml");
-    static SessionFactory sessionFactory = cfg.buildSessionFactory();
-    static Session session = sessionFactory.openSession();
+    static Configuration cfg;
+    static SessionFactory sessionFactory;
+    static Session session;
     static Query<Account> queryAccount;
     static Query<Card> queryCard;
-    EntityManager entityManager;
+    public static boolean isHibernateInitialized = false;
+
+    public static void initHibernate() {
+        cfg = new Configuration();
+        cfg.configure("hibernate.cfg.xml");
+        cfg.addAnnotatedClass(Account.class);
+        cfg.addAnnotatedClass(Card.class);
+        cfg.addAnnotatedClass(org.example.Models.Transaction.class);
+        sessionFactory = cfg.buildSessionFactory();
+        session = sessionFactory.openSession();
+        System.out.println("Hibernate initialized in a separate thread");
+        isHibernateInitialized = true;
+    }
 
     public static Account queryAccount(String userName) {
         String hql;
