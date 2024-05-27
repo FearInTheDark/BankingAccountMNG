@@ -14,8 +14,8 @@
         <property name="hibernate.generate_statistics">false</property>
 
 <!--        Mapping-->
-        <mapping class="org.example.Models.Account"/>
-        <mapping class="org.example.Models.Card"/>
-        <mapping class="org.example.Models.Transaction"/>
+        <mapping class="Models.Account"/>
+        <mapping class="Models.Card"/>
+        <mapping class="Models.Transaction"/>
     </session-factory>
 </hibernate-configuration>
