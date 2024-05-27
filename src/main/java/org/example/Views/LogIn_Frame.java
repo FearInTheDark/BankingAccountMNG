@@ -13,11 +13,10 @@ import org.jdesktop.swingx.error.ErrorInfo;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.example.Utils.Features.toggleLog;
 
@@ -117,7 +116,7 @@ public class LogIn_Frame extends JXFrame {
         txtUsername.setMargin(new Insets(0, 10, 0, 0));
         txtUsername.setFont(new Font("Freeman", Font.ITALIC, 24));
         txtUsername.setBorder(null);
-        txtUsername.setOpaque(false);
+        txtUsername.setBackground(new Color(80, 172, 206, 0));
         txtUsername.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
         txtUsername.addActionListener(e -> confirm());
         txtUsername.addFocusListener(new FocusAdapter() {
@@ -155,6 +154,7 @@ public class LogIn_Frame extends JXFrame {
         txtPassword = new JPlaceholderPasswordField("Enter password here");
         txtPassword.setMaximumSize(new Dimension(400, 50));
         txtPassword.setMargin(new Insets(0, 10, 0, 0));
+        txtPassword.setBackground(new Color(80, 172, 206, 0));
         txtPassword.setFont(new Font("Freeman", Font.ITALIC, 24));
 //        txtPassword.setBorder(null);
         txtPassword.setOpaque(false);
@@ -175,6 +175,7 @@ public class LogIn_Frame extends JXFrame {
         txtPassword2 = new JPlaceholderPasswordField("Re-enter password here");
         txtPassword2.setMaximumSize(new Dimension(400, 50));
         txtPassword2.setMargin(new Insets(0, 10, 0, 0));
+        txtPassword2.setBackground(new Color(80, 172, 206, 0));
         txtPassword2.setFont(new Font("Freeman", Font.ITALIC, 24));
         txtPassword2.setOpaque(false);
         txtPassword2.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
@@ -296,16 +297,21 @@ public class LogIn_Frame extends JXFrame {
         }
         long startTime = System.currentTimeMillis(); // Start time
         Account account;
-        if (SignedAccounts.leftAccounts.containsKey(username)) {
+        if (SignedAccounts.leftAccounts.containsKey(username)
+                && validatePassword(SignedAccounts.leftAccounts.get(username), password)) {
             account = SignedAccounts.leftAccounts.get(username);
-            validatePassword(account, password);
             SignedAccounts.addSignedAccountFromLeft(username);
-        } else {
-            account = DB_Manager.queryAccount(username);
-            validatePassword(account, password);
-            SignedAccounts.addSignedAccount(account);
+            new InApp(account);
+            dispose();
+            return;
         }
-        assert account != null;
+        account = DB_Manager.queryAccount(username);
+        if (!validatePassword(account, password)) {
+            JXErrorPane.showDialog(null, new ErrorInfo("Error", "Invalid username or password", null, "Error", null, null, null));
+            return;
+        }
+        SignedAccounts.addSignedAccount(account);
+
         new InApp(account);
         dispose();
         long endTime = System.currentTimeMillis(); // End time
@@ -352,9 +358,8 @@ public class LogIn_Frame extends JXFrame {
         return true;
     }
 
-    private void validatePassword(Account account, String password) {
-        if (account == null || !account.getPassword().equals(password))
-            JXErrorPane.showDialog(null, new ErrorInfo("Error", "Account not found!", null, "OK", null, null, null));
+    private boolean validatePassword(Account account, String password) {
+        return (account != null && account.getPassword().equals(password));
     }
 
 }

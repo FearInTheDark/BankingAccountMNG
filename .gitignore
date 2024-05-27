@@ -11,7 +11,7 @@ target/
 *.iws
 *.iml
 *.ipr
-.idea/copilot/chatSessions/00000000000.xd
+.idea/copilot/
 
 ### Eclipse ###
 .apt_generated

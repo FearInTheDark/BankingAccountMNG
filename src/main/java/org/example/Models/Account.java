@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.swing.*;
+
 @Getter
 @Setter
 @Data
@@ -53,6 +55,9 @@ public class Account {
     @Transient
     private Card card;
 
+    @Transient
+    private ImageIcon avatar;
+
     public Account() {
 
     }
@@ -68,6 +73,14 @@ public class Account {
         this.password = password;
         this.cardNumber = cardNumber;
         this.card = card;
+    }
+
+    public synchronized Account transferTo(Account account) {
+        return this;
+    }
+
+    public void setAvatar(ImageIcon avatar) {
+        this.avatar = avatar;
     }
 
     @Override

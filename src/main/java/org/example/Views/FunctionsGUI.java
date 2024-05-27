@@ -1,11 +1,10 @@
 package org.example.Views;
 
+import jnafilechooser.api.JnaFileChooser;
 import org.example.Data.DB_Manager;
 import org.example.Models.Account;
 import org.example.Models.Card;
 import org.example.Models.Transaction;
-import org.example.Views.CustomizeUI.MyComboBoxUI;
-import org.jdesktop.swingx.JXPanel;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicScrollBarUI;
@@ -205,7 +204,20 @@ public class FunctionsGUI {
         ImageIcon avatarIcon = new ImageIcon("src/main/java/org/example/Views/icons/InApp/Account/avatar.png");
         Icon avatarIconResize = new ImageIcon(avatarIcon.getImage().getScaledInstance(100, 100, Image.SCALE_DEFAULT));
         avatar.setIcon(avatarIconResize);
+        avatar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         avatar.setBounds(46, 46, 100, 100);
+        avatar.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+//                Choose a picture from JFileChooser
+                JnaFileChooser fileChooser = new JnaFileChooser();
+                boolean show = fileChooser.showOpenDialog(null);
+                if (show) {
+                    System.out.println(fileChooser.getSelectedFile().getAbsolutePath());
+                }
+            }
+        });
 
         JLabel name = new JLabel(account.getFullName().toUpperCase());
         name.setBounds(170, 30, 300, 30);
@@ -354,6 +366,8 @@ public class FunctionsGUI {
                 header.setBounds((width - 800) / 2, 30, 800, 192);
                 main.setBounds((width - 800) / 2, 240, 800, 491);
                 more.setBounds((width - 800) / 2, height - 125, 800, 112);
+                bg.setIcon(new ImageIcon(bgIcon.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT)));
+                bg.setBounds(0, 0, width, height);
             }
         });
 
@@ -365,7 +379,7 @@ public class FunctionsGUI {
         this.height = InHeight;
         JLayeredPane listTransactions = new JLayeredPane();
         listTransactions.setBounds(0, 0, width, height);
-        listTransactions.setBackground(null);
+        listTransactions.setBackground(new Color(0, 0, 0, 0));
         listTransactions.setOpaque(false);
 
         ImageIcon background = new ImageIcon("src/main/java/org/example/Views/icons/InApp/bg_dark1.jpg");
@@ -383,8 +397,22 @@ public class FunctionsGUI {
         title.setVerticalAlignment(JLabel.CENTER);
         title.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.WHITE));
 
+        List<Transaction> transactions = DB_Manager.queryTransactions(account.getId());
+        assert transactions != null;
+        System.out.println("Number of rows: " + transactions.size());
+
         JLayeredPane cardPanel = getCard();
         cardPanel.setBounds((width - 743) / 2, 110, 743, 233);
+
+        JLabel totalTrans = new JLabel("Total transactions: " + transactions.size());
+        totalTrans.setBounds(100, 200, 200, 30);
+        totalTrans.setFont(new Font("Arial", Font.ITALIC, 20));
+        totalTrans.setForeground(Color.BLACK);
+        totalTrans.setHorizontalTextPosition(JLabel.LEFT);
+        totalTrans.setHorizontalAlignment(JLabel.LEFT);
+
+        cardPanel.add(totalTrans, JLayeredPane.PALETTE_LAYER);
+
 
         JScrollPane listTransactionsScroll = new JScrollPane();
         listTransactionsScroll.setBounds((width - 760) / 2, 350, 760, height - 400);
@@ -420,9 +448,6 @@ public class FunctionsGUI {
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
         listPanel.setBackground(null);
         listPanel.setOpaque(false);
-        List<Transaction> transactions = DB_Manager.queryTransactions(account.getId());
-        assert transactions != null;
-        System.out.println("Number of rows: " + transactions.size());
         transactions.forEach(transaction -> {
             Account sender = DB_Manager.queryAccount(transaction.getBankNoFrom());
             Account receiver = DB_Manager.queryAccount(transaction.getBankNoTo());
@@ -492,7 +517,7 @@ public class FunctionsGUI {
         bankNoLB.setBounds(20, 50, 260, 30);
 
         JLabel hide = getHideShow("show");
-        hide.setBounds(290, 50, 30, 30);
+        hide.setBounds(280, 50, 30, 30);
         hide.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

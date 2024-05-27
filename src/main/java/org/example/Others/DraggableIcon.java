@@ -1,5 +1,7 @@
 package org.example.Others;
 
+import org.example.Models.Account;
+import org.example.Views.LiveChat.ChatFrame_Client;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXPanel;
 
@@ -11,6 +13,8 @@ import java.awt.event.MouseEvent;
 public class DraggableIcon extends JXPanel {
     private int mouseX, mouseY;
     private ImageIcon icon;
+    private Account account;
+    private JXFrame chatFrame;
 
     public DraggableIcon(ImageIcon icon) {
         super();
@@ -27,7 +31,12 @@ public class DraggableIcon extends JXPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                System.out.println("Clicked");
+                if (e.getClickCount() == 2) {
+                    if (chatFrame == null) {
+                        chatFrame = new ChatFrame_Client(account);
+                        chatFrame.setVisible(true);
+                    } else chatFrame.setVisible(true);
+                }
                 if (SwingUtilities.isRightMouseButton(e)) {
                     System.out.println("Right clicked");
                 }
@@ -76,4 +85,7 @@ public class DraggableIcon extends JXPanel {
         frame.setVisible(true);
     }
 
+    public void setAccount(Account account) {
+        this.account = account;
+    }
 }

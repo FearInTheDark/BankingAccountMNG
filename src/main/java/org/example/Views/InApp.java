@@ -55,9 +55,12 @@ public class InApp extends JXFrame {
             @Override
             public void componentResized(ComponentEvent e) {
                 frameWidth = getWidth();
-                frameHeight = getHeight();
+                frameHeight = mainHeight = getHeight();
+                mainWidth = frameWidth - menuWidth;
             }
         });
+        ImageIcon icon = new ImageIcon("src/main/java/org/example/Views/icons/Login/frame.png");
+        setIconImage(icon.getImage());
         toggleLog(this);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setVisible(true);
@@ -66,7 +69,8 @@ public class InApp extends JXFrame {
 
     private void init() {
         splitPane = new JSplitPane();
-        splitPane.setDividerLocation(400);
+
+        setAccountAvatar();
 
         createMenuPanel();
         createMainPanel();
@@ -76,16 +80,10 @@ public class InApp extends JXFrame {
         splitPane.setDividerSize(5);
         splitPane.setUI(new MySplitPaneUI());
         splitPane.setDividerLocation(400);
+    }
 
-        addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                int width = getWidth();
-                int height = getHeight();
-                mainWidth = width - menuWidth;
-                mainHeight = height;
-            }
-        });
+    private void setAccountAvatar() {
+        ImageIcon avatar = new ImageIcon("src/main/java/org/example/Views/icons/InApp/Avatar.png");
     }
 
     private void createMainPanel() {
@@ -186,6 +184,7 @@ public class InApp extends JXFrame {
             label.setVerticalAlignment(JLabel.CENTER);
             label.setAlignmentX(Component.CENTER_ALIGNMENT);
             label.setPreferredSize(new Dimension(mainWidth / 3 - 30, 160));
+            label.setToolTipText("Click to " + text);
 
             label.addMouseListener(new MouseAdapter() {
                 final String text = label.getText();
@@ -210,12 +209,14 @@ public class InApp extends JXFrame {
                 public void mouseEntered(MouseEvent e) {
                     String underlineText = "<html><u>" + text + "</u></html>";
                     label.setText(underlineText);
+                    label.setForeground(new Color(211, 129, 34));
                 }
 
                 @Override
                 public void mouseExited(MouseEvent e) {
                     String removeUnderlineText = "<html>" + text + "</html>";
                     label.setText(removeUnderlineText);
+                    label.setForeground(Color.BLACK);
                 }
             });
 
@@ -238,6 +239,7 @@ public class InApp extends JXFrame {
         bgPanel.add(functions, BorderLayout.SOUTH);
 
         DraggableIcon draggableIcon = new DraggableIcon(new ImageIcon("src/main/java/org/example/Views/icons/InApp/robot.png"));
+        draggableIcon.setAccount(account);
         draggableIcon.setBounds(1000, mainHeight /2 + 50, 100, 100);
 
 
