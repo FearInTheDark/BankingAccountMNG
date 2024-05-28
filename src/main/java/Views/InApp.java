@@ -31,7 +31,8 @@ public class InApp extends JXFrame {
     private JPanel menuPanel;
     private int frameWidth = 1600, frameHeight = 1100;
     private int menuWidth = 400, mainWidth = 1200, mainHeight = frameHeight;
-    private Icon frameIcon, bgIcon;
+    private Icon bgIcon;
+    private DraggableIcon draggableIcon;
     private Box box;
     private FunctionsGUI fGUI;
     private boolean isAdmin = false;
@@ -237,9 +238,9 @@ public class InApp extends JXFrame {
         bgPanel.add(background, BorderLayout.CENTER);
         bgPanel.add(functions, BorderLayout.SOUTH);
 
-        DraggableIcon draggableIcon = new DraggableIcon(new ImageIcon("src/main/resources/icons/InApp/robot.png"));
+        draggableIcon = new DraggableIcon(new ImageIcon("src/main/resources/icons/InApp/robot.png"));
         draggableIcon.setAccount(account);
-        draggableIcon.setBounds(1000, mainHeight /2 + 50, 100, 100);
+        draggableIcon.setBounds(1000, mainHeight / 2 + 50, 100, 100);
 
 
         mainLayeredPane.add(bgPanel, JLayeredPane.FRAME_CONTENT_LAYER);
@@ -295,7 +296,6 @@ public class InApp extends JXFrame {
         logo.setAlignmentX(Component.CENTER_ALIGNMENT);
 
 
-        // Welcome Panel
         welcome = new JLabel();
         String name = account.getFullName() != null ? account.getFullName() : "";
         String welcomeText = "<html><div style='text-align: center;'>Welcome <br/>" + name + "</div></html>";
@@ -305,7 +305,6 @@ public class InApp extends JXFrame {
         welcome.setVerticalAlignment(JLabel.CENTER);
         welcome.setHorizontalAlignment(JLabel.CENTER);
         welcome.setAlignmentX(Component.CENTER_ALIGNMENT);
-//        welcome.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
 
         box = getBox();
 
@@ -317,7 +316,6 @@ public class InApp extends JXFrame {
         JPanel others = new JPanel();
         others.setLayout(new FlowLayout(FlowLayout.TRAILING, 20, 0));
         others.setOpaque(false);
-//        others.setPreferredSize(new Dimension(400, 100));
 
         JLabel settings = new JLabel();
         settings.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -328,7 +326,6 @@ public class InApp extends JXFrame {
         settings.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-//                splitPane.setRightComponent(fGUI.getMenuGUI(bankNo));
                 splitPane.setDividerLocation(400);
             }
         });
@@ -346,6 +343,8 @@ public class InApp extends JXFrame {
                     new LogIn_Frame();
                     SignedAccounts.addLeftAccountFromSigned(account.getPhoneNo());
                     dispose();
+                    if (draggableIcon != null && draggableIcon.getChatFrame() != null)
+                        draggableIcon.getChatFrame().closeConnection();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }

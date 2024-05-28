@@ -2,6 +2,7 @@ package Others;
 
 import Models.Account;
 import Views.ChatFrame_Client;
+import lombok.Getter;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXPanel;
 
@@ -9,12 +10,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 
+@Getter
 public class DraggableIcon extends JXPanel {
     private int mouseX, mouseY;
-    private ImageIcon icon;
+    private final ImageIcon icon;
     private Account account;
-    private JXFrame chatFrame;
+    private ChatFrame_Client chatFrame;
 
     public DraggableIcon(ImageIcon icon) {
         super();
@@ -87,5 +90,9 @@ public class DraggableIcon extends JXPanel {
 
     public void setAccount(Account account) {
         this.account = account;
+    }
+
+    public void closeConnection() throws IOException {
+        chatFrame.closeConnection();
     }
 }

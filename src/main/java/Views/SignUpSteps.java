@@ -2,6 +2,8 @@ package Views;
 
 import Data.DB_Manager;
 import Models.Account;
+import com.formdev.flatlaf.FlatClientProperties;
+import raven.datetime.component.date.DatePicker;
 
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;
@@ -35,9 +37,7 @@ public class SignUpSteps extends JFrame {
     }
 
     private void init() {
-
         ImageIcon icon = new ImageIcon("src/main/resources/icons/SignUp/Picture1.png");
-        // Resize image
         Image img = icon.getImage();
         Image imgScale = img.getScaledInstance(600, 600, Image.SCALE_SMOOTH);
         ImageIcon scaledIcon = new ImageIcon(imgScale);
@@ -64,7 +64,6 @@ public class SignUpSteps extends JFrame {
         guideLabel = new JLabel("Please fill in the following information");
         guideLabel.setFont(new Font("Segoe UI", Font.ITALIC, 20));
         guideLabel.setForeground(Color.BLACK);
-//        guideLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         guideLabel.setBounds(600, 100, 600, 50);
         guideLabel.setHorizontalAlignment(JLabel.CENTER);
         guideLabel.setVerticalAlignment(JLabel.CENTER);
@@ -92,28 +91,7 @@ public class SignUpSteps extends JFrame {
         nameField = new JTextField();
         nameField.setBounds(600, 200, 400, 50);
         nameField.setFont(new Font("Segoe UI", Font.PLAIN, 20));
-        // Add FocusListener to nameField when user click on it to show the guideLabel
-        nameField.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (nameField.getText().equals("Please fill in your full name")) {
-                    nameField.setForeground(Color.BLACK);
-                    nameField.setText("");
-                }
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (guideLabel.getText().equals("Please fill in your full name")) {
-                    guideLabel.setText("Please fill in the following information");
-                }
-                if (nameField.getText().isEmpty()) {
-                    nameField.setForeground(new Color(153, 153, 153));
-                    nameField.setText("Please fill in your full name");
-                }
-            }
-        });
-
+        nameField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Please fill in your full name");
 
         // Birthday
         JLabel birthday = new JLabel("BIRTHDAY");
@@ -121,12 +99,10 @@ public class SignUpSteps extends JFrame {
         birthday.setBounds(1000, 150, 200, 50);
         birthday.setForeground(Color.RED);
 
-        birthdayField = new JFormattedTextField(mask);
+        birthdayField = new JFormattedTextField();
         birthdayField.setBounds(1020, 200, 140, 50);
-//        birthdayField.setBorder(new RoundedBorder(10));
         birthdayField.setFont(new Font("Segoe UI", Font.PLAIN, 20));
 
-        // ID CARD and valid date in the same row
         JLabel idCard = new JLabel("ID CARD");
         idCard.setFont(new Font("Segoe UI", Font.BOLD, 15));
         idCard.setBounds(600, 250, 200, 50);
@@ -134,34 +110,16 @@ public class SignUpSteps extends JFrame {
 
         idCardField = new JTextField();
         idCardField.setBounds(600, 300, 280, 50);
-//        idCardField.setBorder(new RoundedBorder(10));
         idCardField.setFont(new Font("Segoe UI", Font.PLAIN, 20));
-        idCardField.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (idCardField.getText().equals("Your ID card number")) {
-                    idCardField.setForeground(Color.BLACK);
-                    idCardField.setText("");
-                }
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (idCardField.getText().isEmpty()) {
-                    idCardField.setForeground(new Color(153, 153, 153));
-                    idCardField.setText("Your ID card number");
-                }
-            }
-        });
+        idCardField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Please fill in your ID card");
 
         JLabel validDate = new JLabel("VALID DATE");
         validDate.setFont(new Font("Segoe UI", Font.BOLD, 15));
         validDate.setBounds(900, 250, 200, 50);
         validDate.setForeground(Color.RED);
 
-        validDateField = new JFormattedTextField(mask);
+        validDateField = new JFormattedTextField();
         validDateField.setBounds(900, 300, 140, 50);
-//        validDateField.setBorder(new RoundedBorder(10));
         validDateField.setFont(new Font("Segoe UI", Font.PLAIN, 20));
 
         // Address
@@ -172,26 +130,8 @@ public class SignUpSteps extends JFrame {
 
         addressField = new JTextField();
         addressField.setBounds(600, 400, 400, 50);
-//        addressField.setBorder(new RoundedBorder(10));
         addressField.setFont(new Font("Segoe UI", Font.PLAIN, 20));
-
-        addressField.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                if (addressField.getText().equals("Your address")) {
-                    addressField.setForeground(Color.BLACK);
-                    addressField.setText("");
-                }
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                if (addressField.getText().isEmpty()) {
-                    addressField.setForeground(new Color(153, 153, 153));
-                    addressField.setText("Your address");
-                }
-            }
-        });
+        addressField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Please fill in your address");
 
         JLabel phoneLabel = new JLabel("Your phone number: " + account.getPhoneNo());
         phoneLabel.setFont(new Font("Segoe UI", Font.ITALIC, 20));
@@ -208,7 +148,6 @@ public class SignUpSteps extends JFrame {
         next.setFont(new Font("Segoe UI", Font.BOLD, 20));
         next.setForeground(Color.WHITE);
         next.setBackground(Color.RED);
-//        next.setBorder(new RoundedBorder(10));
         next.setPreferredSize(new Dimension(150, 50));
         next.addActionListener(e -> {
             if (checkValidInfo()) {
@@ -234,7 +173,6 @@ public class SignUpSteps extends JFrame {
         backButton.setFont(new Font("Segoe UI", Font.BOLD, 20));
         backButton.setForeground(Color.WHITE);
         backButton.setBackground(Color.RED);
-//        backButton.setBorder(new RoundedBorder(10));
         backButton.setPreferredSize(new Dimension(150, 50));
         backButton.addActionListener(e -> {
             try {
@@ -269,6 +207,12 @@ public class SignUpSteps extends JFrame {
 
 
         mainPanel.setVisible(true);
+
+        DatePicker datePicker = new DatePicker();
+        datePicker.setUsePanelOption(true);
+        datePicker.setDateSelectionMode(DatePicker.DateSelectionMode.SINGLE_DATE_SELECTED);
+        datePicker.setEditor(birthdayField);
+        datePicker.setEditor(validDateField);
 
     }
 

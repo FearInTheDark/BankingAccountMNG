@@ -64,5 +64,24 @@
             <artifactId>flatlaf-fonts-roboto</artifactId>
             <version>2.137</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.jiconfont</groupId>
+            <artifactId>jiconfont-swing</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>raven.datetime</groupId>
+            <artifactId>swing-datetime-picker</artifactId>
+            <version>1.2.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/swing-datetime-picker-1.2.2.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>raven.chat</groupId>
+            <artifactId>swing-chatframe</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/lib/java-chatframe-client.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

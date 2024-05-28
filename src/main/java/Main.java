@@ -1,10 +1,9 @@
+import Models.Account;
+import Views.ChatFrame_Client;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
-import Views.LogIn_Frame;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.IOException;
 
 
@@ -13,6 +12,6 @@ public class Main {
         FlatLaf.registerCustomDefaultsSource("FlatLaf.theme");
         FlatRobotoFont.install();
         FlatMacLightLaf.setup();
-        new LogIn_Frame();
+        new ChatFrame_Client(new Account("", "David James", "", "", "", "", "", "", "", null)).setVisible(true);
     }
 }

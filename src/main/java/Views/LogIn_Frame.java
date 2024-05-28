@@ -5,6 +5,8 @@ import Data.DB_Manager;
 import Models.Account;
 import Models.SignedAccounts;
 import Others.PlaceHolder.JPlaceholderPasswordField;
+import com.formdev.flatlaf.FlatClientProperties;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -150,9 +152,7 @@ public class LogIn_Frame extends JXFrame {
         txtPassword = new JPlaceholderPasswordField("Enter password here");
         txtPassword.setMaximumSize(new Dimension(400, 50));
         txtPassword.setMargin(new Insets(0, 10, 0, 0));
-        txtPassword.setBackground(new Color(80, 172, 206, 0));
         txtPassword.setFont(new Font("Freeman", Font.ITALIC, 24));
-//        txtPassword.setBorder(null);
         txtPassword.setOpaque(false);
         txtPassword.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.BLACK));
         txtPassword.addActionListener(e -> confirm());
