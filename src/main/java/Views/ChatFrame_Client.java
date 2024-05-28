@@ -28,7 +28,6 @@ import java.util.Date;
 @Getter
 @Setter
 public class ChatFrame_Client extends JXFrame {
-    private static final Object lock = new Object();
     private Background background1;
     private ChatArea chatArea;
     private Point point;
@@ -125,60 +124,52 @@ public class ChatFrame_Client extends JXFrame {
     }
 
     private void generateConnection() {
-        connectionThread = new Thread(() -> {
-            while (true) {
-                System.out.println("Connecting to server...");
-                try {
-                    synchronized (lock) {
-                        socket = new Socket("localhost", 7777);
-                        dos = new DataOutputStream(socket.getOutputStream());
-                        dis = new DataInputStream(socket.getInputStream());
-                        chatArea.openChat(name);
-                        lock.wait();
-                        lock.notify();
-                    }
-                } catch (IOException | InterruptedException e) {
-                    System.err.println(Thread.currentThread().getName() + " -- Error: " + e.getMessage() + " - " + e.getCause());
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException ex) {
-                        System.err.println(Thread.currentThread().getName() + " -- Error: " + e.getMessage() + " - " + e.getCause());
-                    }
-                    chatArea.closeChat(name);
-                }
-            }
-        });
-        receive = new Thread(() -> {
-            try {
-                while (true) {
-                    synchronized (lock) {
-                        if (dis != null) {
-                            System.out.println("dis is not null");
-                            String message = dis.readUTF();
-                            if (message.equals("exit")) {
-                                chatArea.closeChat(name);
-                                break;
-                            }
-                            SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy, hh:mmaa");
-                            String date = df.format(new Date());
-                            chatArea.addChatBox(new ModelMessage(serverIcon, name, date, message, true));
-                        } else {
-                            System.out.println("dis is null");
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                System.err.println(Thread.currentThread().getName() + " -- Error: " + e.getMessage() + " - " + e.getCause());
-                synchronized (lock) {
-                    lock.notify();
-                    chatArea.closeChat(name);
-                }
-            }
-        });
+        connectionThread = new Thread(this::createConnection);
+        receive = new Thread(this::receiveMessage);
         connectionThread.setName("Connection Thread");
         connectionThread.start();
         receive.setName("Receive Thread");
         receive.start();
+    }
+
+    private synchronized void createConnection() {
+        while (true) {
+            try {
+                socket = new Socket("localhost", 7777);
+                dos = new DataOutputStream(socket.getOutputStream());
+                dis = new DataInputStream(socket.getInputStream());
+                chatArea.openChat(name);
+                notify();
+                wait();
+            } catch (IOException | InterruptedException e) {
+                System.err.println(Thread.currentThread().getName() + " -- Error: " + e.getMessage() + " - " + e.getCause());
+            }
+        }
+    }
+
+    private synchronized void receiveMessage() {
+        while (true) {
+            try {
+                String message = dis.readUTF();
+                if (message.equals("exit")) {
+                    chatArea.closeChat(name);
+                    break;
+                }
+                SimpleDateFormat df = new SimpleDateFormat("dd/MM/yyyy, hh:mmaa");
+                String date = df.format(new Date());
+                chatArea.addChatBox(new ModelMessage(serverIcon, name, date, message, true));
+            } catch (Exception e) {
+                System.err.println(Thread.currentThread().getName() + " -- Error: " + e.getMessage() + " - " + e.getCause());
+                chatArea.closeChat(name);
+                notify();
+                try {
+                    Thread.sleep(3000);
+                    wait();
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        }
     }
 
     public void closeConnection() throws IOException {

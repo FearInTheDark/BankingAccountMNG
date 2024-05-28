@@ -32,6 +32,7 @@ public class Server {
             System.out.println("Server is running on port " + port);
             while (true) {
                 socket = serverSocket.accept();
+                System.out.println(socket.getOutputStream());
                 System.out.println("Client connected: " + socket.getInetAddress().getHostAddress());
                 dataInputStream = new DataInputStream(socket.getInputStream());
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
