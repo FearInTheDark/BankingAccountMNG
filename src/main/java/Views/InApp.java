@@ -5,6 +5,7 @@ import Models.Account;
 import Models.Card;
 import Models.SignedAccounts;
 import Others.DraggableIcon;
+import Views.login.LogIn_Frame;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -50,7 +51,6 @@ public class InApp extends JXFrame {
         add(splitPane);
         setTitle("Banking Management System");
         setSize(frameWidth, frameHeight);
-        setMinimumSize(new Dimension(frameWidth, frameHeight));
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -344,7 +344,7 @@ public class InApp extends JXFrame {
                     SignedAccounts.addLeftAccountFromSigned(account.getPhoneNo());
                     dispose();
                     if (draggableIcon != null && draggableIcon.getChatFrame() != null)
-                        draggableIcon.getChatFrame().closeConnection();
+                        draggableIcon.closeConnection();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }

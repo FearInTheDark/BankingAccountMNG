@@ -1,12 +1,12 @@
-package Views;
+package Views.login;
 
 
 import Data.DB_Manager;
 import Models.Account;
 import Models.SignedAccounts;
+import Others.ANSI_COLORS;
 import Others.PlaceHolder.JPlaceholderPasswordField;
-import com.formdev.flatlaf.FlatClientProperties;
-import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import Views.InApp;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -60,7 +60,7 @@ public class LogIn_Frame extends JXFrame {
      * <p> This method initializes the components of the frame.
      * <p> It creates the main icon, the input panel, the info panel, the title panel, the username panel, the password panel, the password panel 2, the button panel, the show password label, and the show password label 2.
      *
-     * @see Views.LogIn_Frame#initComponents()
+     * @see LogIn_Frame#initComponents()
      */
 
     private void initComponents() {
@@ -312,7 +312,7 @@ public class LogIn_Frame extends JXFrame {
         dispose();
         long endTime = System.currentTimeMillis(); // End time
 
-        System.out.println("Time taken: " + (endTime - startTime) + "ms");
+        System.out.println("Time taken: " + ANSI_COLORS.GREEN.getCode() + (endTime - startTime) + "ms" + ANSI_COLORS.RESET.getCode());
     }
 
 

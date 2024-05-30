@@ -1,7 +1,8 @@
 package Others;
 
 import Models.Account;
-import Views.ChatFrame_Client;
+import Views.chat.ChatFrame_Client;
+import Views.chat.ChatFrame_Threading;
 import lombok.Getter;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXPanel;
@@ -18,6 +19,7 @@ public class DraggableIcon extends JXPanel {
     private final ImageIcon icon;
     private Account account;
     private ChatFrame_Client chatFrame;
+    private ChatFrame_Threading chatFrameThreading;
 
     public DraggableIcon(ImageIcon icon) {
         super();
@@ -38,6 +40,8 @@ public class DraggableIcon extends JXPanel {
                     if (chatFrame == null) {
                         chatFrame = new ChatFrame_Client(account);
                         chatFrame.setVisible(true);
+                        chatFrameThreading = new ChatFrame_Threading(chatFrame);
+                        chatFrameThreading.generateConnection();
                     } else chatFrame.setVisible(true);
                 }
                 if (SwingUtilities.isRightMouseButton(e)) {
@@ -93,6 +97,6 @@ public class DraggableIcon extends JXPanel {
     }
 
     public void closeConnection() throws IOException {
-        chatFrame.closeConnection();
+        chatFrameThreading.closeConnection();
     }
 }

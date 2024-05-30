@@ -1,10 +1,13 @@
 package Models;
 
+import java.net.Socket;
 import java.util.HashMap;
 
 public class SignedAccounts {
     public static HashMap<String, Account> signedAccounts = new HashMap<>();
     public static HashMap<String, Account> leftAccounts = new HashMap<>();
+    public static HashMap<Socket, Account> clients = new HashMap<>();
+
 
     public static void addSignedAccount(Account account) {
         signedAccounts.put(account.getPhoneNo(), account);

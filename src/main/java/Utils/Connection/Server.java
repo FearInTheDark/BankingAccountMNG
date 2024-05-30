@@ -1,16 +1,19 @@
 package Utils.Connection;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
+import Models.Account;
+import lombok.Getter;
+
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import static Models.SignedAccounts.clients;
+
+@Getter
 public class Server {
     private ServerSocket serverSocket;
-    private int port = 7777;
+    private final int port = 7777;
     private DataOutputStream dataOutputStream;
     private DataInputStream dataInputStream;
     private BufferedReader bufferedReader;
@@ -32,8 +35,8 @@ public class Server {
             System.out.println("Server is running on port " + port);
             while (true) {
                 socket = serverSocket.accept();
-                System.out.println(socket.getOutputStream());
                 System.out.println("Client connected: " + socket.getInetAddress().getHostAddress());
+//                assignAccount();
                 dataInputStream = new DataInputStream(socket.getInputStream());
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
 
@@ -51,7 +54,7 @@ public class Server {
                             System.out.println("Client: " + message);
                         }
                     } catch (Exception e) {
-                        System.err.println(Thread.currentThread().getName() + " Error: " + e.getMessage() + " - " + e.getCause());
+                        System.err.println("Receive_Thread:" + " Error: " + e.getMessage() + " - " + e.getCause());
                         if (socket.isClosed())
                             System.out.println("Client disconnected: " + socket.getInetAddress().getHostAddress());
                     }
@@ -61,9 +64,9 @@ public class Server {
                         try {
                             String message = bufferedReader.readLine();
                             if (message.isEmpty()) continue;
-                            dataOutputStream.writeUTF(message);
+                            send(message);
                         } catch (Exception e) {
-                            System.err.println(Thread.currentThread().getName() + " Error: " + e.getMessage() + " - " + e.getCause());
+                            System.err.println("Send_Thread" + " Error: " + e.getMessage() + " - " + e.getCause());
                         }
                     }
                 });
@@ -72,7 +75,36 @@ public class Server {
                 sendThread.start();
             }
         } catch (Exception e) {
-            System.err.println(Thread.currentThread().getName() + " Error: " + e.getMessage() + " - " + e.getCause());
+            System.err.println("Main_Thread: " + " Error: " + e.getMessage() + " - " + e.getCause());
+        }
+    }
+
+    private void assignAccount() {
+        try {
+            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+            Account account = (Account) objectInputStream.readObject();
+            if (clients.containsValue(account)) return;
+            System.out.println(account.getFullName());
+            if (!clients.containsValue(account)) {
+                clients.put(socket, account);
+                System.out.println("Account assigned: " + account.getFullName());
+                System.out.println(clients.size());
+            }
+        } catch (IOException e) {
+            System.err.println("Error while assigning account: " + e.getMessage() + " - " + e.getCause());
+        } catch (ClassNotFoundException e) {
+            System.out.println("Error while casting object: " + e.getMessage() + " - " + e.getCause());
+        } catch (Exception e) {
+            System.err.println("Error assigning account: " + e.getMessage() + " - " + e.getCause());
+        }
+    }
+
+    private void send(String message) {
+        try {
+            dataOutputStream.writeUTF(message);
+            dataOutputStream.flush();
+        } catch (Exception e) {
+            System.err.println("Error while sending message: " + e.getMessage() + " - " + e.getCause());
         }
     }
 }

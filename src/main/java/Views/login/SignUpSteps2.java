@@ -1,4 +1,4 @@
-package Views;
+package Views.login;
 
 import Data.DB_Manager;
 import Models.Account;

@@ -1,4 +1,4 @@
-package Views;
+package Views.login;
 
 import Data.DB_Manager;
 import Models.Account;
@@ -8,8 +8,6 @@ import raven.datetime.component.date.DatePicker;
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
 import java.io.IOException;
 public class SignUpSteps extends JFrame {
     private final Account account;
