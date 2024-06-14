@@ -1,6 +1,6 @@
 package Utils.Connection;
 
-import Models.Account;
+import Models.ModelAccount;
 import lombok.Getter;
 
 import java.net.Socket;
@@ -10,11 +10,11 @@ import static Models.SignedAccounts.clients;
 @Getter
 public class ServerManage {
     private final Socket socket;
-    private final Account account;
+    private final ModelAccount modelAccount;
 
     public ServerManage(Socket socket) {
         this.socket = socket;
-        this.account = clients.get(socket);
+        this.modelAccount = clients.get(socket);
     }
 
 }

@@ -8,13 +8,16 @@ import lombok.Setter;
 
 import javax.swing.*;
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Getter
 @Setter
 @Data
 @Entity(name = "users_management")
 @Table(name = "users_management")
-public class Account implements Serializable {
+public class ModelAccount implements Serializable {
 
     @Id
     @Column(name = "bankNo")
@@ -31,7 +34,7 @@ public class Account implements Serializable {
 
     @Column(name = "birthDay")
     @SerializedName("BirthDay")
-    private String birthDay;
+    private Date birthDay;
 
     @Column(name = "idCard")
     @SerializedName("IDCard")
@@ -39,7 +42,7 @@ public class Account implements Serializable {
 
     @Column(name = "validDate")
     @SerializedName("ValidDate")
-    private String validDate;
+    private Date validDate;
 
     @Column(name = "address")
     @SerializedName("Address")
@@ -54,31 +57,47 @@ public class Account implements Serializable {
     private String cardNumber;
 
     @Transient
-    private transient Card card;
+    private transient ModelCard modelCard;
 
     @Transient
     private transient ImageIcon avatar;
 
-    public Account() {
+    public ModelAccount() {
 
     }
 
-    public Account(String id, String fullName, String phoneNo, String birthDay, String idCard, String validDate, String address, String password, String cardNumber, Card card) {
+    public ModelAccount(String id, String fullName, String phoneNo, String birthDay, String idCard, String validDate, String address, String password, String cardNumber, ModelCard modelCard) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         this.id = id;
         this.fullName = fullName;
         this.phoneNo = phoneNo;
-        this.birthDay = birthDay;
+        this.birthDay = (!birthDay.isEmpty() ? sdf.parse(birthDay) : null);
         this.idCard = idCard;
-        this.validDate = validDate;
+        this.validDate = (!validDate.isEmpty() ? sdf.parse(validDate) : null);
         this.address = address;
         this.password = password;
         this.cardNumber = cardNumber;
-        this.card = card;
+        this.modelCard = modelCard;
     }
 
-    public synchronized Account transferTo(Account account) {
-        return this;
+    public ModelAccount(String id, String fullName, String phoneNo, String birthDay, String idCard, String validDate, String address, String password, String cardNumber) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        this.id = id;
+        this.fullName = fullName;
+        this.phoneNo = phoneNo;
+        this.birthDay = sdf.parse(birthDay);
+        this.idCard = idCard;
+        this.validDate = sdf.parse(validDate);
+        this.address = address;
+        this.password = password;
+        this.cardNumber = cardNumber;
     }
+
+    public Object[] toTableRow(int rowNum) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return new Object[]{false, rowNum, id, phoneNo, fullName, sdf.format(birthDay), idCard, sdf.format(validDate), address, password, cardNumber};
+    }
+
 
     public void setAvatar(ImageIcon avatar) {
         this.avatar = avatar;
@@ -97,5 +116,15 @@ public class Account implements Serializable {
                 "\tPassword: " + password + "\n" +
                 "\tCard Number: " + cardNumber + "\n";
 //                "\tCard: " + card + "\n";
+    }
+
+    public synchronized void transferTo(ModelCard receiverCard, int amountTemp) {
+        if (modelCard.getBalance() < amountTemp) {
+            JOptionPane.showMessageDialog(null, "Your balance is not enough to transfer", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        receiverCard.setBalance(receiverCard.getBalance() + amountTemp);
+        modelCard.setBalance(modelCard.getBalance() - amountTemp);
+
     }
 }

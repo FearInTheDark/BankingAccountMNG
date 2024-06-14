@@ -1,7 +1,7 @@
-package Views.login;
+package Views.app;
 
 import Data.DB_Manager;
-import Models.Account;
+import Models.ModelAccount;
 import com.formdev.flatlaf.FlatClientProperties;
 import raven.datetime.component.date.DatePicker;
 
@@ -9,18 +9,23 @@ import javax.swing.*;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+
 public class SignUpSteps extends JFrame {
-    private final Account account;
+    private final ModelAccount modelAccount;
     private JLabel guideLabel;
     private JTextField nameField, idCardField, addressField;
     private JFormattedTextField validDateField, birthdayField;
     private JLayeredPane mainPanel;
     private MaskFormatter mask;
+    private SimpleDateFormat dateStoringFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public SignUpSteps(String phone, String password) {
-        account = new Account();
-        account.setPhoneNo(phone);
-        account.setPassword(password);
+        modelAccount = new ModelAccount();
+        modelAccount.setPhoneNo(phone);
+        modelAccount.setPassword(password);
 
         customizeMask();
         init();
@@ -87,7 +92,7 @@ public class SignUpSteps extends JFrame {
         name.setForeground(Color.RED);
 
         nameField = new JTextField();
-        nameField.setBounds(600, 200, 400, 50);
+        nameField.setBounds(600, 200, 380, 50);
         nameField.setFont(new Font("Segoe UI", Font.PLAIN, 20));
         nameField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Please fill in your full name");
 
@@ -98,7 +103,7 @@ public class SignUpSteps extends JFrame {
         birthday.setForeground(Color.RED);
 
         birthdayField = new JFormattedTextField();
-        birthdayField.setBounds(1020, 200, 140, 50);
+        birthdayField.setBounds(1000, 200, 160, 50);
         birthdayField.setFont(new Font("Segoe UI", Font.PLAIN, 20));
 
         JLabel idCard = new JLabel("ID CARD");
@@ -117,7 +122,7 @@ public class SignUpSteps extends JFrame {
         validDate.setForeground(Color.RED);
 
         validDateField = new JFormattedTextField();
-        validDateField.setBounds(900, 300, 140, 50);
+        validDateField.setBounds(900, 300, 160, 50);
         validDateField.setFont(new Font("Segoe UI", Font.PLAIN, 20));
 
         // Address
@@ -131,7 +136,7 @@ public class SignUpSteps extends JFrame {
         addressField.setFont(new Font("Segoe UI", Font.PLAIN, 20));
         addressField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Please fill in your address");
 
-        JLabel phoneLabel = new JLabel("Your phone number: " + account.getPhoneNo());
+        JLabel phoneLabel = new JLabel("Your phone number: " + modelAccount.getPhoneNo());
         phoneLabel.setFont(new Font("Segoe UI", Font.ITALIC, 20));
         phoneLabel.setBounds(600, 450, 400, 50);
         phoneLabel.setForeground(Color.BLACK);
@@ -154,12 +159,16 @@ public class SignUpSteps extends JFrame {
                     idCardField.requestFocus();
                     return;
                 }
-                account.setFullName(nameField.getText());
-                account.setIdCard(idCardField.getText());
-                account.setAddress(addressField.getText());
-                account.setBirthDay(convertDate(birthdayField.getText()));
-                account.setValidDate(convertDate(validDateField.getText()));
-                new SignUpSteps2(account);
+                modelAccount.setFullName(nameField.getText());
+                modelAccount.setIdCard(idCardField.getText());
+                modelAccount.setAddress(addressField.getText());
+                try {
+                    modelAccount.setBirthDay(dateStoringFormat.parse(birthdayField.getText()));
+                    modelAccount.setValidDate(dateStoringFormat.parse(validDateField.getText()));
+                } catch (ParseException ex) {
+                    System.err.println("Error in parsing date");
+                }
+                new SignUpSteps2(modelAccount);
                 dispose();
             } else {
                 guideLabel.setText("Please correct your information");
@@ -206,11 +215,14 @@ public class SignUpSteps extends JFrame {
 
         mainPanel.setVisible(true);
 
-        DatePicker datePicker = new DatePicker();
-        datePicker.setUsePanelOption(true);
-        datePicker.setDateSelectionMode(DatePicker.DateSelectionMode.SINGLE_DATE_SELECTED);
-        datePicker.setEditor(birthdayField);
-        datePicker.setEditor(validDateField);
+        for (int i = 0; i < 2; i++) {
+            DatePicker datePicker = new DatePicker();
+            int finalI = i;
+            datePicker.setDateSelectionAble(localDate -> finalI == 0 ? localDate.isBefore(LocalDate.now()) : localDate.isAfter(LocalDate.now()));
+            datePicker.setUsePanelOption(true);
+            datePicker.setDateSelectionMode(DatePicker.DateSelectionMode.SINGLE_DATE_SELECTED);
+            datePicker.setEditor(i == 0 ? birthdayField : validDateField);
+        }
 
     }
 

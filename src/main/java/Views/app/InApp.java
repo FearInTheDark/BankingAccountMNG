@@ -1,11 +1,13 @@
-package Views;
+package Views.app;
 
 import Data.DB_Manager;
-import Models.Account;
-import Models.Card;
+import Models.ModelAccount;
+import Models.ModelCard;
 import Models.SignedAccounts;
 import Others.DraggableIcon;
-import Views.login.LogIn_Frame;
+import Views.FunctionsGUI;
+import Views.TransferGUI;
+import Views.table_management.Table;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -24,8 +26,8 @@ import static Utils.Features.toggleLog;
 public class InApp extends JXFrame {
     String[] quickAccessesText = {"Dashboard", "Accounts", "Transactions", "Cards", "Saving", "Manage Accounts"};
     String[] qAIcons = {"Dashboard.png", "Accounts.png", "Transactions.png", "Cards.png", "Saving.png", "ManageAccount.png"};
-    private Account account;
-    private Card card;
+    private ModelAccount modelAccount;
+    private ModelCard modelCard;
     private JLabel logo, welcome, bgPic;
     private JSplitPane splitPane;
     private JLayeredPane bgPanel, mainLayeredPane, featuresPanel;
@@ -41,11 +43,11 @@ public class InApp extends JXFrame {
     public InApp() {
     }
 
-    public InApp(Account account) {
-        this.account = account;
-        isAdmin = (account.getFullName().equalsIgnoreCase("Admin"));
-        card = DB_Manager.queryCard(account.getCardNumber());
-        fGUI = new FunctionsGUI(account, card);
+    public InApp(ModelAccount modelAccount) {
+        this.modelAccount = modelAccount;
+        isAdmin = (modelAccount.getFullName().equalsIgnoreCase("Admin"));
+        modelCard = DB_Manager.queryCard(modelAccount.getCardNumber());
+        fGUI = new FunctionsGUI(modelAccount, modelCard);
         init();
 
         add(splitPane);
@@ -102,7 +104,7 @@ public class InApp extends JXFrame {
         bgPic.setPreferredSize(new Dimension(mainWidth, 600));
         bgPic.setBounds(0, 0, mainWidth, 600);
 
-        JLayeredPane cardPane = fGUI.getCard();
+        JLayeredPane cardPane = fGUI.getModelCard();
         cardPane.setBounds((mainWidth - 743) / 2, (600) / 2 + 150, 743, 233);
 
         JLabel showBankAcc = new JLabel();
@@ -191,10 +193,14 @@ public class InApp extends JXFrame {
 
                 @Override
                 public void mouseClicked(MouseEvent e) {
+                    if (isAdmin) {
+                        JOptionPane.showMessageDialog(null, "You are not allowed to use this function", "Access Denied", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                     switch (text) {
                         case "Transfer":
-//                            JLayeredPane transfer = fGUI.getTransferGUI(bankNo);
-//                            splitPane.setRightComponent(transfer);
+                            JPanel transfer = TransferGUI.getTransferGUI(modelAccount, mainWidth, mainHeight);
+                            splitPane.setRightComponent(transfer);
                             splitPane.setDividerLocation(400);
                             break;
                         case "Card Services":
@@ -239,7 +245,7 @@ public class InApp extends JXFrame {
         bgPanel.add(functions, BorderLayout.SOUTH);
 
         draggableIcon = new DraggableIcon(new ImageIcon("src/main/resources/icons/InApp/robot.png"));
-        draggableIcon.setAccount(account);
+        draggableIcon.setModelAccount(modelAccount);
         draggableIcon.setBounds(1000, mainHeight / 2 + 50, 100, 100);
 
 
@@ -297,7 +303,7 @@ public class InApp extends JXFrame {
 
 
         welcome = new JLabel();
-        String name = account.getFullName() != null ? account.getFullName() : "";
+        String name = modelAccount.getFullName() != null ? modelAccount.getFullName() : "";
         String welcomeText = "<html><div style='text-align: center;'>Welcome <br/>" + name + "</div></html>";
         welcome.setText(welcomeText);
         welcome.setFont(new Font("Segeo UI", Font.BOLD, 30));
@@ -341,7 +347,7 @@ public class InApp extends JXFrame {
             public void mouseClicked(MouseEvent e) {
                 try {
                     new LogIn_Frame();
-                    SignedAccounts.addLeftAccountFromSigned(account.getPhoneNo());
+                    SignedAccounts.addLeftAccountFromSigned(modelAccount.getPhoneNo());
                     dispose();
                     if (draggableIcon != null && draggableIcon.getChatFrame() != null)
                         draggableIcon.closeConnection();
@@ -402,35 +408,33 @@ public class InApp extends JXFrame {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     switch (index) {
-                        case 0:
+                        case 0 -> {
                             splitPane.setRightComponent(mainLayeredPane);
                             splitPane.setDividerLocation(400);
-                            break;
-                        case 1:
+                        }
+                        case 1 -> {
                             JLayeredPane accounts = fGUI.AccountInformation(mainWidth, mainHeight);
                             splitPane.setRightComponent(accounts);
                             splitPane.setDividerLocation(400);
-                            break;
-                        case 2:
+                        }
+                        case 2 -> {
                             JLayeredPane listTransactions = fGUI.getListTransactions(mainWidth, mainHeight);
                             splitPane.setRightComponent(listTransactions);
                             revalidate();
                             repaint();
                             splitPane.setDividerLocation(400);
-                            break;
-                        case 3:
-//                            JLayeredPane cards = fGUI.CardInfo();
-//                            splitPane.setRightComponent(cards);
+                        }
+                        case 3 -> {
+                            splitPane.setRightComponent(fGUI.CardInfo(modelAccount, modelAccount.getModelCard()));
                             splitPane.setDividerLocation(400);
-                            break;
-                        case 5:
-//                            new ManageFrame();
-//                            splitPane.setDividerLocation(300);
-                            break;
+                        }
+                        case 4 -> JOptionPane.showMessageDialog(null, "Coming soon", "Feature", JOptionPane.INFORMATION_MESSAGE);
+                        case 5 -> {
+                            JFrame table = new Table();
+                            table.setVisible(true);
+                        }
                     }
                 }
-
-
                 @Override
                 public void mouseEntered(MouseEvent e) {
                     String underlineText = "<html><u>" + text + "</u></html>";

@@ -6,12 +6,16 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 @Getter
 @Setter
 @Data
 @Entity(name = "atm_transactions")
 @Table(name = "atm_transactions")
-public class Transaction {
+public class ModelTransaction {
     @Id
     @Column(name = "t_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)     // Auto generate new value
@@ -32,20 +36,25 @@ public class Transaction {
 
     @Column(name = "t_date")
     @SerializedName("Date")
-    private String date;
+    private Date date;
 
     @Column(name = "letter")
     @SerializedName("Letter")
     private String letter;
 
-    public Transaction() {
+    public ModelTransaction() {
     }
 
-    public Transaction(String bankNoFrom, String bankNoTo, int amount, String date, String letter) {
+    public ModelTransaction(String bankNoFrom, String bankNoTo, int amount, String date, String letter) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         this.bankNoFrom = bankNoFrom;
         this.bankNoTo = bankNoTo;
         this.amount = amount;
-        this.date = date;
+        try {
+            this.date = (date == null) ? new Date() : formatter.parse(date);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
         this.letter = letter;
     }
 

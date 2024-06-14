@@ -9,12 +9,14 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @Data
 @Entity(name = "atm_card_details")
 @Table(name = "atm_card_details")
-public class Card {
+public class ModelCard implements Serializable {
     @Id
     @Column(name = "card_number")
     @SerializedName("CardNumber")
@@ -52,10 +54,10 @@ public class Card {
     @SerializedName("Balance")
     private int balance;
 
-    public Card() {
+    public ModelCard() {
     }
 
-    public Card(String id, String pin, String bankNo, String cardStatus, String cardType, String cardIssueDate, String cardExpiryDate, String cvv, int balance) {
+    public ModelCard(String id, String pin, String bankNo, String cardStatus, String cardType, String cardIssueDate, String cardExpiryDate, String cvv, int balance) {
         this.id = id;
         this.pin = pin;
         this.bankNo = bankNo;

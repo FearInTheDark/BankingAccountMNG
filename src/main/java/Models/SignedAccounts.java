@@ -4,13 +4,13 @@ import java.net.Socket;
 import java.util.HashMap;
 
 public class SignedAccounts {
-    public static HashMap<String, Account> signedAccounts = new HashMap<>();
-    public static HashMap<String, Account> leftAccounts = new HashMap<>();
-    public static HashMap<Socket, Account> clients = new HashMap<>();
+    public static HashMap<String, ModelAccount> signedAccounts = new HashMap<>();
+    public static HashMap<String, ModelAccount> leftAccounts = new HashMap<>();
+    public static HashMap<Socket, ModelAccount> clients = new HashMap<>();
 
 
-    public static void addSignedAccount(Account account) {
-        signedAccounts.put(account.getPhoneNo(), account);
+    public static void addSignedAccount(ModelAccount modelAccount) {
+        signedAccounts.put(modelAccount.getPhoneNo(), modelAccount);
     }
 
     public static void removeLeftAccount(String phoneNo) {
@@ -18,14 +18,14 @@ public class SignedAccounts {
     }
 
     public static void addSignedAccountFromLeft(String phoneNo) {
-        Account account = leftAccounts.get(phoneNo);
-        signedAccounts.put(phoneNo, account);
+        ModelAccount modelAccount = leftAccounts.get(phoneNo);
+        signedAccounts.put(phoneNo, modelAccount);
         leftAccounts.remove(phoneNo);
     }
 
     public static void addLeftAccountFromSigned(String phoneNo) {
-        Account account = signedAccounts.get(phoneNo);
-        leftAccounts.put(phoneNo, account);
+        ModelAccount modelAccount = signedAccounts.get(phoneNo);
+        leftAccounts.put(phoneNo, modelAccount);
         signedAccounts.remove(phoneNo);
     }
 }

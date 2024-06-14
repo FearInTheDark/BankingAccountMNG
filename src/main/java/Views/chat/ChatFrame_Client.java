@@ -1,9 +1,6 @@
 package Views.chat;
 
-import Models.Account;
-import javaswingdev.GoogleMaterialDesignIcon;
-import javaswingdev.GoogleMaterialIcon;
-import javaswingdev.GradientType;
+import Models.ModelAccount;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,9 +13,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 @EqualsAndHashCode(callSuper = true)
@@ -28,21 +23,10 @@ public class ChatFrame_Client extends JXFrame {
     private Background background1;
     private ChatArea chatArea;
     private Point point;
-    private Account account;
-    private Socket socket;
-    private Thread receive, connectionThread;
-    private String message;
-    private DataOutputStream dos;
-    private DataInputStream dis;
-    private String serverIcon = "/icons/LiveChat/p2.png";
-    private String clientIcon = "/icons/LiveChat/p1.png";
-    private String accountName;
-    private GoogleMaterialIcon warningIcon = new GoogleMaterialIcon(GoogleMaterialDesignIcon.WARNING, GradientType.VERTICAL, new Color(217, 19, 19), new Color(222, 71, 71), 35);
-    private GoogleMaterialIcon availIcon = new GoogleMaterialIcon(GoogleMaterialDesignIcon.WIFI, GradientType.VERTICAL, new Color(32, 166, 33), new Color(30, 150, 32), 35);
+    private ModelAccount modelAccount;
 
-    public ChatFrame_Client(Account account) {
-        this.account = account;
-        accountName = Arrays.stream(account.getFullName().split(" ")).reduce((first, second) -> second).orElse("");
+    public ChatFrame_Client(ModelAccount modelAccount) {
+        this.modelAccount = modelAccount;
         initComponents();
     }
 
@@ -81,7 +65,7 @@ public class ChatFrame_Client extends JXFrame {
         });
 
         chatArea.getCmdClose().addActionListener(evt -> dispose());
-        chatArea.closeChat(accountName);
+        chatArea.closeChat(modelAccount.getFullName());
 
         pack();
         setLocationRelativeTo(null);

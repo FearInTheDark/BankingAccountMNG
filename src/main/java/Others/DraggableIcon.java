@@ -1,8 +1,11 @@
 package Others;
 
-import Models.Account;
+import Models.ModelAccount;
 import Views.chat.ChatFrame_Client;
 import Views.chat.ChatFrame_Threading;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.fonts.roboto.FlatRobotoFont;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import lombok.Getter;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXPanel;
@@ -12,12 +15,13 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.text.ParseException;
 
 @Getter
 public class DraggableIcon extends JXPanel {
     private int mouseX, mouseY;
     private final ImageIcon icon;
-    private Account account;
+    private ModelAccount modelAccount;
     private ChatFrame_Client chatFrame;
     private ChatFrame_Threading chatFrameThreading;
 
@@ -38,7 +42,7 @@ public class DraggableIcon extends JXPanel {
                 super.mouseClicked(e);
                 if (e.getClickCount() == 2) {
                     if (chatFrame == null) {
-                        chatFrame = new ChatFrame_Client(account);
+                        chatFrame = new ChatFrame_Client(modelAccount);
                         chatFrame.setVisible(true);
                         chatFrameThreading = new ChatFrame_Threading(chatFrame);
                         chatFrameThreading.generateConnection();
@@ -79,21 +83,29 @@ public class DraggableIcon extends JXPanel {
         icon.paintIcon(this, g, 0, 0);
     }
 
-    public static void main(String[] args) {
+    /*Test Draggable Icon*/
+    public static void main(String[] args) throws ParseException {
+        FlatLaf.registerCustomDefaultsSource("FlatLaf.theme");
+        FlatRobotoFont.install();
+        FlatMacLightLaf.setup();
         JXFrame frame = new JXFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 400);
         frame.setLayout(null);
         frame.setBackground(Color.BLACK);
-        DraggableIcon icon = new DraggableIcon(new ImageIcon("src/main/resources/icons/InApp/Addition.png"));
+        ImageIcon robotIcon = new ImageIcon("src/main/resources/icons/InApp/robot.png");
+        Image image = robotIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+        DraggableIcon icon = new DraggableIcon(new ImageIcon(image));
+        icon.setModelAccount(new ModelAccount("", "David Johns", "", "", "", "", "", "", "", null));
+
         icon.setBounds(100, 100, 50, 50);
         frame.add(icon);
 
         frame.setVisible(true);
     }
 
-    public void setAccount(Account account) {
-        this.account = account;
+    public void setModelAccount(ModelAccount modelAccount) {
+        this.modelAccount = modelAccount;
     }
 
     public void closeConnection() throws IOException {

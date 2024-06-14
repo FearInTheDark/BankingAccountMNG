@@ -1,9 +1,10 @@
-package Views.login;
+package Views.app;
 
 import Data.DB_Manager;
-import Models.Account;
-import Models.Card;
+import Models.ModelAccount;
+import Models.ModelCard;
 import Utils.ObjectToJson;
+import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,18 +15,19 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ActionEvent;
 
+@Getter
 public class SignUpSteps2 extends JFrame {
-    private Account account;
-    private Card card;
+    private final ModelAccount modelAccount;
+    private final ModelCard modelCard;
     private String PIN;
     private String bankNoTemp, cardNumberTemp, CVVTemp;
     private JLabel bankNoLabel;
     private JLabel cardNumberLabel;
     private JLayeredPane layeredPane;
 
-    public SignUpSteps2(Account account)  {
-        this.account = account;
-        this.card = new Card();
+    public SignUpSteps2(ModelAccount modelAccount)  {
+        this.modelAccount = modelAccount;
+        this.modelCard = new ModelCard();
         setDates();
         genCard();
         init();
@@ -45,9 +47,9 @@ public class SignUpSteps2 extends JFrame {
     private void setDates() {
         LocalDate currentDate = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        card.setCardIssueDate(currentDate.format(formatter));
-        card.setCardExpiryDate(currentDate.plusYears(5).format(formatter));
-        card.setBalance(0);
+        modelCard.setCardIssueDate(currentDate.format(formatter));
+        modelCard.setCardExpiryDate(currentDate.plusYears(5).format(formatter));
+        modelCard.setBalance(0);
     }
 
     private void init() {
@@ -117,8 +119,8 @@ public class SignUpSteps2 extends JFrame {
         FROM_TO_LABEL.setHorizontalAlignment(JLabel.LEFT);
 
 
-        String beginDateShow = card.getCardIssueDate().substring(5, 7) + "/" + card.getCardIssueDate().substring(2, 4);
-        String endDateShow = card.getCardExpiryDate().substring(5, 7) + "/" + card.getCardExpiryDate().substring(2, 4);
+        String beginDateShow = modelCard.getCardIssueDate().substring(5, 7) + "/" + modelCard.getCardIssueDate().substring(2, 4);
+        String endDateShow = modelCard.getCardExpiryDate().substring(5, 7) + "/" + modelCard.getCardExpiryDate().substring(2, 4);
 
         JLabel beginDateLabel = new JLabel(beginDateShow);
         beginDateLabel.setBounds(50, 190, 75, 20);
@@ -183,15 +185,15 @@ public class SignUpSteps2 extends JFrame {
                         JOptionPane.showMessageDialog(null, "PIN must be 4 digits!", "Error", JOptionPane.ERROR_MESSAGE);
                         PIN = JOptionPane.showInputDialog(null, "Your PIN: ", "PIN", JOptionPane.INFORMATION_MESSAGE);
                     }
-                    card.setPin(PIN);
-                    account.setCard(card);
-                    JOptionPane.showMessageDialog(null, "Bank No: " + card.getBankNo() + "\nCard Number: " + card.getId() + "\nCVV: " + card.getCvv() + "\nPIN: " + PIN, "Card Info", JOptionPane.INFORMATION_MESSAGE);
+                    modelCard.setPin(PIN);
+                    modelAccount.setModelCard(modelCard);
+                    JOptionPane.showMessageDialog(null, "Bank No: " + modelCard.getBankNo() + "\nCard Number: " + modelCard.getId() + "\nCVV: " + modelCard.getCvv() + "\nPIN: " + PIN, "Card Info", JOptionPane.INFORMATION_MESSAGE);
                 }
 
-                System.out.println(ObjectToJson.convertToJson(account));
-                System.out.println(ObjectToJson.convertToJson(card));
+                System.out.println(ObjectToJson.convertToJson(modelAccount));
+                System.out.println(ObjectToJson.convertToJson(modelCard));
 
-                if (DB_Manager.saveAccount(account) && DB_Manager.saveCard(card)) {
+                if (DB_Manager.saveAccount(modelAccount) && DB_Manager.saveCard(modelCard)) {
                     JOptionPane.showMessageDialog(null, "Successfully Save an Account and Card!");
                     int cf2 = JOptionPane.showConfirmDialog(null, "Do you want to log in now?", "Log In", JOptionPane.YES_NO_OPTION);
                     if (cf2 == JOptionPane.YES_OPTION) {
@@ -215,11 +217,9 @@ public class SignUpSteps2 extends JFrame {
 
             public void mouseClicked(MouseEvent evt) {
                 genCard();
-                // repaint card info
                 bankNoLabel.setText("Bank No: " + bankNoTemp);
                 cardNumberLabel.setText(cardNumberTemp);
                 cvvNum.setText(CVVTemp);
-
             }
         });
 
@@ -235,13 +235,13 @@ public class SignUpSteps2 extends JFrame {
     }
 
     private void setCardInfo(String bankNo, String cardNumber, String CVV) {
-        card.setBankNo(bankNo);
-        card.setId(cardNumber);
-        card.setCvv(CVV);
-        card.setCardType("Debit");
-        card.setCardStatus("Active");
-        account.setCardNumber(cardNumber);
-        account.setId(bankNo);
+        modelCard.setBankNo(bankNo);
+        modelCard.setId(cardNumber);
+        modelCard.setCvv(CVV);
+        modelCard.setCardType("Debit");
+        modelCard.setCardStatus("Active");
+        modelAccount.setCardNumber(cardNumber);
+        modelAccount.setId(bankNo);
     }
 
     private void genCard() {

@@ -1,12 +1,11 @@
-package Views.login;
+package Views.app;
 
 
 import Data.DB_Manager;
-import Models.Account;
+import Models.ModelAccount;
 import Models.SignedAccounts;
 import Others.ANSI_COLORS;
 import Others.PlaceHolder.JPlaceholderPasswordField;
-import Views.InApp;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXLabel;
 import org.jdesktop.swingx.JXPanel;
@@ -24,7 +23,7 @@ import static Utils.Features.toggleLog;
  * <p> It contains the components of the frame such as the username, password, login button, and sign up button.
  * <p> It also contains the methods to initialize the components, confirm the input, and validate the input.
  *
- * @see Models.Account
+ * @see ModelAccount
  * @see Models.SignedAccounts
  */
 
@@ -276,7 +275,7 @@ public class LogIn_Frame extends JXFrame {
 
     private void confirm() {
         if (txtUsername.getText().equals("admin") && String.valueOf(txtPassword.getPassword()).equals("admin")) {
-            Account admin = DB_Manager.queryAccount("0000000000");
+            ModelAccount admin = DB_Manager.queryAccount("0000000000");
             assert admin != null;
             new InApp(admin);
             dispose();
@@ -287,28 +286,36 @@ public class LogIn_Frame extends JXFrame {
         String username = txtUsername.getText();
         String password = String.valueOf(txtPassword.getPassword());
         if (inSignUp) {
-            new SignUpSteps(username, password);
-            dispose();
+            if (DB_Manager.checkExistAccount(username)) {
+                JOptionPane.showMessageDialog(null, "This account already exists!", "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                new SignUpSteps(username, password);
+                dispose();
+            }
             return;
         }
         long startTime = System.currentTimeMillis(); // Start time
-        Account account;
+        ModelAccount modelAccount;
         if (SignedAccounts.leftAccounts.containsKey(username)
                 && validatePassword(SignedAccounts.leftAccounts.get(username), password)) {
-            account = SignedAccounts.leftAccounts.get(username);
+            modelAccount = SignedAccounts.leftAccounts.get(username);
             SignedAccounts.addSignedAccountFromLeft(username);
-            new InApp(account);
+            new InApp(modelAccount);
             dispose();
             return;
         }
-        account = DB_Manager.queryAccount(username);
-        if (!validatePassword(account, password)) {
+        modelAccount = DB_Manager.queryAccount(username);
+        if (!validatePassword(modelAccount, password)) {
             JOptionPane.showMessageDialog(null, "No account found with this username or password!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        SignedAccounts.addSignedAccount(account);
-
-        new InApp(account);
+        if (SignedAccounts.signedAccounts.containsValue(modelAccount)) {
+            JOptionPane.showMessageDialog(null, "This account is already signed in!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        SignedAccounts.addSignedAccount(modelAccount);
+        new InApp(modelAccount);
+        modelAccount.setModelCard(DB_Manager.queryCard(modelAccount.getId()));
         dispose();
         long endTime = System.currentTimeMillis(); // End time
 
@@ -354,8 +361,8 @@ public class LogIn_Frame extends JXFrame {
         return true;
     }
 
-    private boolean validatePassword(Account account, String password) {
-        return (account != null && account.getPassword().equals(password));
+    private boolean validatePassword(ModelAccount modelAccount, String password) {
+        return (modelAccount != null && modelAccount.getPassword().equals(password));
     }
 
 }

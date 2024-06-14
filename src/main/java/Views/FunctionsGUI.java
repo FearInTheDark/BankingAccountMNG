@@ -1,13 +1,15 @@
 package Views;
 
 import Data.DB_Manager;
-import Models.Account;
-import Models.Card;
-import Models.Transaction;
+import Models.ModelAccount;
+import Models.ModelCard;
+import Models.ModelTransaction;
 import jnafilechooser.api.JnaFileChooser;
+import lombok.Getter;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -15,28 +17,41 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static Utils.Formatter.formatAccountNumber;
 import static Utils.Formatter.maskAccountNumber;
 
+@Getter
 public class FunctionsGUI {
     private static JPopupMenu popupMenu;
-    private final Account account;
-    private final Card card;
+    private final ModelAccount modelAccount;
+    private final ModelCard modelCard;
+    private final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
     private int width;
     private int height;
     private boolean isHiddenCard = false;
     private boolean isHidden = false;
     private boolean isHiddenBalance = false;
 
-    public FunctionsGUI(Account account, Card card) {
-        this.account = account;
-        this.card = card;
+    public FunctionsGUI(ModelAccount modelAccount, ModelCard modelCard) {
+        this.modelAccount = modelAccount;
+        this.modelCard = modelCard;
     }
 
-    public JLayeredPane createPanel(Transaction transaction, Account sender, Account receiver) {
-        boolean isSender = transaction.getBankNoFrom().equals(sender.getId());
+    static JLabel getHideShow(String iconPath) {
+        JLabel hide = new JLabel();
+        ImageIcon hideIcon = new ImageIcon("src/main/resources/icons/InApp/" + iconPath + ".png");
+        Icon hideIconResize = new ImageIcon(hideIcon.getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT));
+        hide.setIcon(hideIconResize);
+        hide.setPreferredSize(new Dimension(30, 30));
+
+        return hide;
+    }
+
+    public JLayeredPane createPanel(ModelTransaction modelTransaction, ModelAccount sender, ModelAccount receiver) {
+        boolean isSender = modelTransaction.getBankNoFrom().equals(sender.getId());
         JLayeredPane panel = new JLayeredPane();
         panel.setLayout(null);
         panel.setOpaque(false);
@@ -85,7 +100,7 @@ public class FunctionsGUI {
         type.setForeground((isSender ? Color.RED : new Color(32, 192, 48)));
         type.setBounds(350, 5, 80, 20);
 
-        String amountSeperated = String.format("%,d", transaction.getAmount());
+        String amountSeperated = String.format("%,d", modelTransaction.getAmount());
         String amountSrt = (isSender ? "- " : "+ ") + amountSeperated + " VND";
         JLabel amountLabel = new JLabel(amountSrt);
         amountLabel.setFont(new Font("Calibri", Font.BOLD, 28));
@@ -101,14 +116,15 @@ public class FunctionsGUI {
         dateText.setForeground(Color.BLACK);
         dateText.setBounds(310, 70, 50, 32);
 
-
-        String dateFixed = "<html>" + transaction.getDate().substring(0, 10) + "<br>" + transaction.getDate().substring(11, 19) + "</html>";
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String date = sdf.format(modelTransaction.getDate());
+        String dateFixed = "<html>" + date.substring(0, 10) + "<br>" + date.substring(11, 19) + "</html>";
         JLabel dateLabel = new JLabel(dateFixed);
         dateLabel.setFont(new Font("Calibri", Font.ITALIC | Font.PLAIN, 15));
         dateLabel.setForeground(Color.BLACK);
         dateLabel.setBounds(365, 70, 100, 36);
 
-        JLabel letterLabel = new JLabel(transaction.getLetter());
+        JLabel letterLabel = new JLabel(modelTransaction.getLetter());
         ImageIcon letterIcon = new ImageIcon("src/main/resources/icons/InApp/letterFrame.png");
         Icon letterResized = new ImageIcon(letterIcon.getImage().getScaledInstance(240, 100, Image.SCALE_DEFAULT));
         letterLabel.setIcon(letterResized);
@@ -116,7 +132,7 @@ public class FunctionsGUI {
         letterLabel.setFont(new Font("Calibri", Font.ITALIC | Font.PLAIN, 15));
 
         JTextArea textArea = new JTextArea();
-        String letterText = "From : " + sender.getFullName().toUpperCase() + "\n" + transaction.getLetter();
+        String letterText = "From : " + sender.getFullName().toUpperCase() + "\n" + modelTransaction.getLetter();
         textArea.setText(letterText);
         textArea.setBounds(510, 10, 220, 80);
         textArea.setLineWrap(true);
@@ -181,16 +197,6 @@ public class FunctionsGUI {
         return panel;
     }
 
-    static JLabel getHideShow(String iconPath) {
-        JLabel hide = new JLabel();
-        ImageIcon hideIcon = new ImageIcon("src/main/resources/icons/InApp/" + iconPath + ".png");
-        Icon hideIconResize = new ImageIcon(hideIcon.getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT));
-        hide.setIcon(hideIconResize);
-        hide.setPreferredSize(new Dimension(30, 30));
-
-        return hide;
-    }
-
     public JLayeredPane AccountInformation(int width, int height) {
         JLayeredPane accountInformation = new JLayeredPane();
 
@@ -208,6 +214,7 @@ public class FunctionsGUI {
         headerForm.setBounds(0, 0, 800, 192);
 
         JLabel avatar = new JLabel();
+        System.out.println(modelAccount.getAvatar());
         ImageIcon avatarIcon = new ImageIcon("src/main/resources/icons/InApp/Account/avatar.png");
         Icon avatarIconResize = new ImageIcon(avatarIcon.getImage().getScaledInstance(100, 100, Image.SCALE_DEFAULT));
         avatar.setIcon(avatarIconResize);
@@ -217,16 +224,21 @@ public class FunctionsGUI {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-//                Choose a picture from JFileChooser
                 JnaFileChooser fileChooser = new JnaFileChooser();
+                fileChooser.setMode(JnaFileChooser.Mode.Files);
                 boolean show = fileChooser.showOpenDialog(null);
                 if (show) {
-                    System.out.println(fileChooser.getSelectedFile().getAbsolutePath());
+                    ImageIcon imageIcon = new ImageIcon(fileChooser.getSelectedFile().getAbsolutePath());
+                    Icon iconResize = new ImageIcon(imageIcon.getImage().getScaledInstance(100, 100, Image.SCALE_DEFAULT));
+                    modelAccount.setAvatar(imageIcon);
+                    avatar.setIcon(iconResize);
+                    avatar.revalidate();
+                    avatar.repaint();
                 }
             }
         });
 
-        JLabel name = new JLabel(account.getFullName().toUpperCase());
+        JLabel name = new JLabel(modelAccount.getFullName().toUpperCase());
         name.setBounds(170, 30, 300, 30);
         name.setFont(new Font("Arial", Font.BOLD, 30));
         name.setForeground(Color.WHITE);
@@ -234,7 +246,7 @@ public class FunctionsGUI {
         name.setHorizontalAlignment(JLabel.LEFT);
         name.setVerticalAlignment(JLabel.CENTER);
 
-        JLabel phoneNo = new JLabel("Phone Number: " + account.getPhoneNo());
+        JLabel phoneNo = new JLabel("Phone Number: " + modelAccount.getPhoneNo());
         phoneNo.setBounds(170, 70, 300, 30);
         phoneNo.setFont(new Font("Arial", Font.PLAIN, 20));
         phoneNo.setForeground(Color.WHITE);
@@ -242,7 +254,7 @@ public class FunctionsGUI {
         phoneNo.setHorizontalAlignment(JLabel.LEFT);
         phoneNo.setVerticalAlignment(JLabel.CENTER);
 
-        JLabel citizenID = new JLabel("Citizen ID: " + account.getIdCard());
+        JLabel citizenID = new JLabel("Citizen ID: " + modelAccount.getIdCard());
         citizenID.setBounds(170, 110, 300, 30);
         citizenID.setFont(new Font("Arial", Font.PLAIN, 20));
         citizenID.setForeground(Color.WHITE);
@@ -250,7 +262,7 @@ public class FunctionsGUI {
         citizenID.setHorizontalAlignment(JLabel.LEFT);
         citizenID.setVerticalAlignment(JLabel.CENTER);
 
-        JLabel birthday = new JLabel("Birthday: " + account.getBirthDay());
+        JLabel birthday = new JLabel("Birthday: " + modelAccount.getBirthDay());
         birthday.setBounds(170, 150, 300, 30);
         birthday.setFont(new Font("Arial", Font.PLAIN, 20));
         birthday.setForeground(Color.WHITE);
@@ -274,12 +286,11 @@ public class FunctionsGUI {
         mainForm.setBounds(0, 0, 800, 491);
 
         String[] keys = {"Full Name", "Phone Number", "Citizen ID", "Birthday", "Bank Number", "Balance", "Address"};
-        String[] values = {account.getFullName(), account.getPhoneNo(), account.getIdCard(), account.getBirthDay(), account.getId(), String.format("%,d", card.getBalance()), account.getAddress()};
+        String[] values = {modelAccount.getFullName(), modelAccount.getPhoneNo(), modelAccount.getIdCard(), sdf.format(modelAccount.getBirthDay()), modelAccount.getId(), String.format("%,d", modelCard.getBalance()), modelAccount.getAddress()};
         for (int i = 0; i < keys.length; i++) {
-            // 6 lines each line includes 2 JLabels 400 * 60 gap 10 font Jetbrains Mono 25 White color
             JLabel key = new JLabel(keys[i] + ": ");
             key.setBounds(0, 20 + i * 60, 400, 60);
-            key.setFont(new Font("JetBrains Mono", Font.BOLD, 30));
+            key.setFont(new Font("Roboto", Font.BOLD, 30));
             key.setForeground(Color.WHITE);
             key.setHorizontalTextPosition(JLabel.RIGHT);
             key.setHorizontalAlignment(JLabel.RIGHT);
@@ -287,7 +298,7 @@ public class FunctionsGUI {
 
             JLabel value = new JLabel(values[i]);
             value.setBounds(400, 20 + i * 60, 400, 60);
-            value.setFont(new Font("JetBrains Mono", Font.PLAIN, 30));
+            value.setFont(new Font("Roboto", Font.PLAIN, 30));
             value.setForeground(Color.WHITE);
             value.setHorizontalTextPosition(JLabel.LEFT);
             value.setHorizontalAlignment(JLabel.LEFT);
@@ -402,13 +413,13 @@ public class FunctionsGUI {
         title.setVerticalAlignment(JLabel.CENTER);
         title.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.WHITE));
 
-        List<Transaction> transactions = DB_Manager.queryTransactions(account.getId());
-        assert transactions != null;
-        System.out.println("Number of rows: " + transactions.size());
+        List<ModelTransaction> modelTransactions = DB_Manager.queryTransactions(modelAccount.getId());
+        assert modelTransactions != null;
+        System.out.println("Number of rows: " + modelTransactions.size());
 
-        JLayeredPane cardPanel = getCard();
+        JLayeredPane cardPanel = getModelCard();
 
-        JLabel totalTrans = new JLabel("Total transactions: " + transactions.size());
+        JLabel totalTrans = new JLabel("Total transactions: " + modelTransactions.size());
         totalTrans.setBounds(100, 200, 200, 30);
         totalTrans.setPreferredSize(new Dimension(200, 30));
         totalTrans.setFont(new Font("Arial", Font.ITALIC, 20));
@@ -423,11 +434,11 @@ public class FunctionsGUI {
         JPanel listPanel = new JPanel();
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
         listPanel.setOpaque(false);
-        transactions.forEach(transaction -> {
-            Account sender = DB_Manager.queryAccount(transaction.getBankNoFrom());
-            Account receiver = DB_Manager.queryAccount(transaction.getBankNoTo());
+        modelTransactions.forEach(modelTransaction -> {
+            ModelAccount sender = DB_Manager.queryAccount(modelTransaction.getBankNoFrom());
+            ModelAccount receiver = DB_Manager.queryAccount(modelTransaction.getBankNoTo());
             if (sender == null || receiver == null) return;
-            listPanel.add(createPanel(transaction, sender, receiver));
+            listPanel.add(createPanel(modelTransaction, sender, receiver));
         });
 
         listTransactionsScroll.setViewportView(listPanel);
@@ -436,7 +447,7 @@ public class FunctionsGUI {
         listTransactionsScroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         listTransactionsScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-        JPanel dataPanel = new JPanel(new MigLayout("al center center, fillx, debug", "5[]5[240!]10[]10", ""));
+        JPanel dataPanel = new JPanel(new MigLayout("al center center, fillx", "5[]5[240!]10[]10", ""));
         dataPanel.setOpaque(false);
         dataPanel.setBounds(0, 0, width, height);
 
@@ -464,7 +475,257 @@ public class FunctionsGUI {
         return listTransactions;
     }
 
-    public JLayeredPane getCard() {
+    public JLayeredPane CardInfo(ModelAccount account, ModelCard card) {
+        JLayeredPane cardInfo = new JLayeredPane();
+//        cardInfo.setBounds(0, 0, width, height);
+        cardInfo.setBackground(null);
+
+        JLabel title = new JLabel("Card Information");
+        title.setBounds(0, 0, width, 100);
+        title.setFont(new Font("Tahoma", Font.BOLD, 50));
+        title.setForeground(Color.BLACK);
+        title.setVerticalTextPosition(JLabel.CENTER);
+        title.setHorizontalTextPosition(JLabel.CENTER);
+        title.setHorizontalAlignment(JLabel.CENTER);
+        title.setVerticalAlignment(JLabel.CENTER);
+//        title.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+
+        JLabel cardBG = new JLabel();
+        ImageIcon cardBGIcon = new ImageIcon("src/main/resources/icons/InApp/CardInfo/cardBG.png");
+        Icon cardBGIconResize = new ImageIcon(cardBGIcon.getImage().getScaledInstance(600, 500, Image.SCALE_DEFAULT));
+        cardBG.setIcon(cardBGIconResize);
+        cardBG.setBounds((width - 600) / 2, 100, 600 + 2, 500);
+
+        JLabel cardForm = new JLabel();
+        ImageIcon cardFormIcon = new ImageIcon("src/main/resources/icons/InApp/CardInfo/cardForm.png");
+        Icon cardFormIconResize = new ImageIcon(cardFormIcon.getImage().getScaledInstance(600, 500, Image.SCALE_DEFAULT));
+        cardForm.setBounds((width - 600) / 2, 100, 600, 500);
+        cardForm.setIcon(cardFormIconResize);
+        cardForm.setPreferredSize(new Dimension(600, 500));
+//        cardForm.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+
+        JPanel cardInfoPanel = new JPanel(null);
+//        cardInfoPanel.setBounds(150 + 100, 210, 450, 300);
+        cardInfoPanel.setBounds((width - 600) / 2, 100, 600, 500);
+        cardInfoPanel.setOpaque(false);
+//        cardInfoPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK, 1));
+
+        ImageIcon VKUicon = new ImageIcon("src/icons/frame.png");
+        Image VKUimage = VKUicon.getImage();
+        Image newVKUimage = VKUimage.getScaledInstance(130, 130, Image.SCALE_SMOOTH);
+        VKUicon = new ImageIcon(newVKUimage);
+
+        JLabel VKU = new JLabel();
+        VKU.setIcon(VKUicon);
+        VKU.setBounds(235, 100, 130, 130);
+        VKU.setPreferredSize(new Dimension(130, 130));
+        VKU.setHorizontalAlignment(JLabel.CENTER);
+        VKU.setFont(new Font("Segoe UI", Font.BOLD, 40));
+//        VKU.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.red));
+
+        JLabel bankNoLabel = new JLabel("Bank No: " + account.getId());
+        bankNoLabel.setBounds(240, 240, 290, 20);
+        bankNoLabel.setFont(new Font("JetBrains Mono", Font.BOLD, 15));
+        bankNoLabel.setForeground(Color.red);
+        bankNoLabel.setHorizontalAlignment(JLabel.CENTER);
+//        bankNoLabel.setBorder(BorderFactory.createLineBorder(Color.red, 1));
+
+        JLabel FROM_TO_LABEL = new JLabel("FROM    TO");
+        FROM_TO_LABEL.setBounds(130, 270, 150, 30);
+        FROM_TO_LABEL.setFont(new Font("JetBrains Mono", Font.BOLD, 20));
+        FROM_TO_LABEL.setForeground(Color.black);
+        FROM_TO_LABEL.setHorizontalAlignment(JLabel.LEFT);
+
+
+        String beginDateShow = card.getCardIssueDate();
+        String endDateShow = card.getCardExpiryDate();
+
+        JLabel beginDateLabel = new JLabel(beginDateShow);
+        beginDateLabel.setBounds(135, 305, 75, 20);
+        beginDateLabel.setFont(new Font("JetBrains Mono", Font.BOLD, 15));
+        beginDateLabel.setForeground(Color.black);
+        beginDateLabel.setHorizontalAlignment(JLabel.RIGHT);
+
+        JLabel endDateLabel = new JLabel(endDateShow);
+        endDateLabel.setBounds(210, 305, 75, 20);
+        endDateLabel.setFont(new Font("JetBrains Mono", Font.BOLD, 15));
+        endDateLabel.setForeground(Color.black);
+        endDateLabel.setHorizontalAlignment(JLabel.RIGHT);
+
+        String cardNoSeperated = maskAccountNumber(card.getId());
+        System.out.println(cardNoSeperated);
+        JLabel cardNumberLabel = new JLabel(cardNoSeperated);
+        cardNumberLabel.setBounds(70, 335, 520, 50);
+        cardNumberLabel.setFont(new Font("JetBrains Mono", Font.PLAIN, 40));
+        cardNumberLabel.setForeground(Color.white);
+        cardNumberLabel.setHorizontalAlignment(JLabel.CENTER);
+
+        JLabel cvvLabel = new JLabel("CVV ");
+        cvvLabel.setBounds(300, 294, 50, 40);
+        cvvLabel.setFont(new Font("JetBrains Mono", Font.BOLD, 15));
+        cvvLabel.setForeground(Color.white);
+        cvvLabel.setHorizontalAlignment(JLabel.CENTER);
+
+        JLabel cvvNum = new JLabel(card.getCvv());
+        cvvNum.setBounds(350, 294, 50, 40);
+        cvvNum.setFont(new Font("JetBrains Mono", Font.ITALIC, 25));
+        cvvNum.setForeground(Color.GRAY);
+        cvvNum.setHorizontalAlignment(JLabel.CENTER);
+
+        JLayeredPane cardSttPane = new JLayeredPane();
+        cardSttPane.setLayout(new FlowLayout(FlowLayout.CENTER));
+        cardSttPane.setBounds(0, 430, 600, 80);
+        cardSttPane.setBackground(null);
+
+        JLabel cardStt = new JLabel();
+        cardStt.setText("Card Status: ");
+        cardStt.setFont(new Font("JetBrains Mono", Font.BOLD, 20));
+        cardStt.setForeground(new Color(26, 35, 78));
+
+        JLabel cardSttIcon = new JLabel();
+        String cardSttIconPath = (card.getCardStatus().equals("Active")) ? "src/main/resources/icons/InApp/CardInfo/Active.png" : "src/main/resources/icons/InApp/CardInfo/cardLocked.png";
+        cardSttIcon.setIcon(new ImageIcon(cardSttIconPath));
+
+        cardSttIcon.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (card.getCardStatus().equals("Active")) {
+                    int dialogButton = JOptionPane.YES_NO_OPTION;
+                    int dialogResult = JOptionPane.showConfirmDialog(null, "Do you want to lock your card?", "Warning", dialogButton);
+                    if (dialogResult == JOptionPane.YES_OPTION) {
+                        String PIN = JOptionPane.showInputDialog(null, "Enter your PIN: ", "PIN", JOptionPane.INFORMATION_MESSAGE);
+                        if (!PIN.equals(card.getPin())) {
+                            JOptionPane.showMessageDialog(null, "Wrong PIN", "Error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        card.setCardStatus("Locked");
+                        DB_Manager.updateCard(card);
+                        cardSttIcon.setIcon(new ImageIcon("src/main/resources/icons/InApp/CardInfo/cardLocked.png"));
+                        JOptionPane.showMessageDialog(null, "Lock card successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Your card is still active", "Warning", JOptionPane.WARNING_MESSAGE);
+                    }
+                } else {
+                    int dialogButton = JOptionPane.YES_NO_OPTION;
+                    int dialogResult = JOptionPane.showConfirmDialog(null, "Do you want to unlock your card?", "Warning", dialogButton);
+                    if (dialogResult == JOptionPane.YES_OPTION) {
+                        String PIN = JOptionPane.showInputDialog(null, "Enter your PIN: ", "PIN", JOptionPane.INFORMATION_MESSAGE);
+                        if (!PIN.equals(card.getPin())) {
+                            JOptionPane.showMessageDialog(null, "Wrong PIN", "Error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+                        card.setCardStatus("Active");
+                        DB_Manager.updateCard(card);
+                        cardSttIcon.setIcon(new ImageIcon("src/main/resources/icons/InApp/CardInfo/Active.png"));
+                        JOptionPane.showMessageDialog(null, "Unlock card successfully", "Success", JOptionPane.INFORMATION_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Your card is still locked", "Warning", JOptionPane.WARNING_MESSAGE);
+                    }
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (card.getCardStatus().equals("Active")) {
+                    cardSttIcon.setIcon(new ImageIcon("src/main/resources/icons/InApp/CardInfo/Active_press.png"));
+                } else {
+                    cardSttIcon.setIcon(new ImageIcon("src/main/resources/icons/InApp/CardInfo/cardLocked_press.png"));
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (card.getCardStatus().equals("Active")) {
+                    cardSttIcon.setIcon(new ImageIcon("src/main/resources/icons/InApp/CardInfo/Active_Hover.png"));
+                } else {
+                    cardSttIcon.setIcon(new ImageIcon("src/main/resources/icons/InApp/CardInfo/cardLocked_Hover.png"));
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (card.getCardStatus().equals("Active")) {
+                    cardSttIcon.setIcon(new ImageIcon("src/main/resources/icons/InApp/CardInfo/Active.png"));
+                } else {
+                    cardSttIcon.setIcon(new ImageIcon("src/main/resources/icons/InApp/CardInfo/cardLocked.png"));
+                }
+            }
+        });
+
+        cardSttPane.add(cardStt);
+        cardSttPane.add(cardSttIcon);
+
+        cardInfoPanel.add(VKU);
+        cardInfoPanel.add(bankNoLabel);
+        cardInfoPanel.add(cardNumberLabel);
+        cardInfoPanel.add(FROM_TO_LABEL);
+        cardInfoPanel.add(beginDateLabel);
+        cardInfoPanel.add(endDateLabel);
+        cardInfoPanel.add(cvvLabel);
+        cardInfoPanel.add(cvvNum);
+        cardInfoPanel.add(cardSttPane);
+
+        JScrollPane cardInfoScroll = new JScrollPane();
+        cardInfoScroll.setBounds((width - 600) / 2, 625, 610, 250);
+        cardInfoScroll.getVerticalScrollBar().setPreferredSize(new Dimension(8, 3));
+
+        JPanel cardInfoPanelScroll = new JPanel();
+        cardInfoPanelScroll.setLayout(new BoxLayout(cardInfoPanelScroll, BoxLayout.Y_AXIS));
+        cardInfoPanelScroll.setBackground(null);
+        cardInfoPanelScroll.setOpaque(false);
+
+        String[] listInfo = {"Cardholder Name", "Source Account", "Card Number", "Card Type", "Card Status", "Begin Date", "End Date", "CVV"};
+        String[] listInfoValue = {account.getFullName(), account.getId(), card.getId(), "Debit", card.getCardStatus(), card.getCardIssueDate(), card.getCardExpiryDate(), card.getCvv()};
+        for (int i = 0; i < listInfo.length; i++) {
+
+            JPanel infoPanel = new JPanel();
+            infoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+            infoPanel.setBackground(null);
+            infoPanel.setOpaque(false);
+            infoPanel.setPreferredSize(new Dimension(600, 65));
+
+            JLabel infoKey = new JLabel(listInfo[i] + ": ");
+            infoKey.setFont(new Font("JetBrains Mono", Font.BOLD, 25));
+            infoKey.setForeground(Color.black);
+            infoKey.setHorizontalAlignment(JLabel.LEFT);
+
+            JLabel infoValue = new JLabel(listInfoValue[i]);
+            infoValue.setFont(new Font("JetBrains Mono", Font.PLAIN, 25));
+            infoValue.setForeground(Color.black);
+            infoValue.setHorizontalAlignment(JLabel.RIGHT);
+
+            infoPanel.add(infoKey);
+            infoPanel.add(infoValue);
+            cardInfoPanelScroll.add(infoPanel);
+        }
+
+
+        cardInfoScroll.setViewportView(cardInfoPanelScroll);
+
+        cardInfo.add(title, JLayeredPane.PALETTE_LAYER);
+        cardInfo.add(cardBG, JLayeredPane.DEFAULT_LAYER);
+        cardInfo.add(cardForm, JLayeredPane.PALETTE_LAYER);
+        cardInfo.add(cardInfoPanel, JLayeredPane.MODAL_LAYER);
+        cardInfo.add(cardInfoScroll, JLayeredPane.PALETTE_LAYER);
+
+        cardInfo.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                width = cardInfo.getWidth();
+                height = cardInfo.getHeight();
+                title.setBounds(0, 0, width, 100);
+                cardBG.setBounds((width - 600) / 2, 100, 600 + 2, 500);
+                cardForm.setBounds((width - 600) / 2, 100, 600, 500);
+                cardInfoPanel.setBounds((width - 600) / 2, 100, 600, 500);
+                cardInfoScroll.setBounds((width - 600) / 2, 625, 610, (height - 625) - 25);
+            }
+        });
+
+        return cardInfo;
+    }
+
+
+    public JLayeredPane getModelCard() {
         JLabel frameLabel = new JLabel();
         ImageIcon frame = new ImageIcon("src/main/resources/icons/InApp/rectangle.png");
         ImageIcon frameIcon = new ImageIcon(frame.getImage().getScaledInstance(743, 233, Image.SCALE_DEFAULT));
@@ -482,7 +743,7 @@ public class FunctionsGUI {
         bankAcc.setBounds(20, 20, 300, 30);
 
         JLabel bankNoLB = new JLabel();
-        String bankNum = card.getBankNo();
+        String bankNum = modelCard.getBankNo();
         StringBuilder bankNumHid = new StringBuilder();
         for (int i = 0; i < bankNum.length(); i++) {
             if (i >= 10 || bankNum.charAt(i) == ' ') {
@@ -524,7 +785,7 @@ public class FunctionsGUI {
         bankBalance.setBounds(20, 90, 84, 30);
 
         JLabel bankBalanceNo = new JLabel();
-        String balanceText = String.format("%,d", card.getBalance());
+        String balanceText = String.format("%,d", modelCard.getBalance());
         bankBalanceNo.setText(balanceText);
         bankBalanceNo.setFont(new Font("Arial", Font.BOLD, 28));
         bankBalanceNo.setBounds(110, 90, 170, 30);
@@ -554,15 +815,15 @@ public class FunctionsGUI {
             String currency = (String) currencyBox.getSelectedItem();
             switch (currency) {
                 case "VND" -> bankBalanceNo.setText(balanceText);
-                case "USD" -> bankBalanceNo.setText(String.format("%,.2f", card.getBalance() / 23000.0));
-                case "EUR" -> bankBalanceNo.setText(String.format("%,.2f", card.getBalance() / 27000.0));
-                case "JPY" -> bankBalanceNo.setText(String.format("%,.2f", card.getBalance() / 210.0));
-                case "GBP" -> bankBalanceNo.setText(String.format("%,.2f", card.getBalance() / 30000.0));
-                case "AUD" -> bankBalanceNo.setText(String.format("%,.2f", card.getBalance() / 17000.0));
-                case "CAD" -> bankBalanceNo.setText(String.format("%,.2f", card.getBalance() / 18000.0));
-                case "CHF" -> bankBalanceNo.setText(String.format("%,.2f", card.getBalance() / 25000.0));
-                case "CNY" -> bankBalanceNo.setText(String.format("%,.2f", card.getBalance() / 3500.0));
-                case "HKD" -> bankBalanceNo.setText(String.format("%,.2f", card.getBalance() / 3000.0));
+                case "USD" -> bankBalanceNo.setText(String.format("%,.2f", modelCard.getBalance() / 23000.0));
+                case "EUR" -> bankBalanceNo.setText(String.format("%,.2f", modelCard.getBalance() / 27000.0));
+                case "JPY" -> bankBalanceNo.setText(String.format("%,.2f", modelCard.getBalance() / 210.0));
+                case "GBP" -> bankBalanceNo.setText(String.format("%,.2f", modelCard.getBalance() / 30000.0));
+                case "AUD" -> bankBalanceNo.setText(String.format("%,.2f", modelCard.getBalance() / 17000.0));
+                case "CAD" -> bankBalanceNo.setText(String.format("%,.2f", modelCard.getBalance() / 18000.0));
+                case "CHF" -> bankBalanceNo.setText(String.format("%,.2f", modelCard.getBalance() / 25000.0));
+                case "CNY" -> bankBalanceNo.setText(String.format("%,.2f", modelCard.getBalance() / 3500.0));
+                case "HKD" -> bankBalanceNo.setText(String.format("%,.2f", modelCard.getBalance() / 3000.0));
                 case null -> {
 
                 }
@@ -571,7 +832,7 @@ public class FunctionsGUI {
         });
 
         JLabel cardNo = new JLabel();
-        String cardNum = card.getId();
+        String cardNum = modelCard.getId();
         String cardNumFix = formatAccountNumber(cardNum);
         String hiddenCardNo = maskAccountNumber(cardNum);
 
@@ -634,7 +895,7 @@ public class FunctionsGUI {
         card.setBackground(null);
 
         JLabel cardNo = new JLabel();
-        String cardNum = this.card.getId();
+        String cardNum = this.modelCard.getId();
         String cardNumFix = formatAccountNumber(cardNum);
         String hiddenCardNo = maskAccountNumber(cardNum);
 
